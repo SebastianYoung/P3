@@ -7,6 +7,8 @@ import sys
 cap = cv2.VideoCapture(0)
 
 go = False
+running = True
+
 
 while (True):
 
@@ -14,33 +16,58 @@ while (True):
 
     # Converts the video capture to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    ycr = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
+    ysv = hsv + ycr
+
+
+
+    if running:
+        colour = hsv[330,240]
+        running = False
+
     # Target colour ranges
     lowerTargetedColour = np.array([4, 200, 96])
     upperTargetColour = np.array([25, 255, 220])
+    lowerCallibratedColour = np.array([colour[0]-10, colour[1]-20, colour[2]-15])
+    upperCallibratedColour = np.array([colour[0]+10, colour[1]+20, colour[2]+15])
+
 
     mask = cv2.inRange(hsv, lowerTargetedColour, upperTargetColour)
+    # mask = cv2.inRange(hsv, lowerCallibratedColour, upperCallibratedColour)
 
     res = cv2.bitwise_and(frame, frame, mask = mask)
 
+    gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
+
     thresh, res_thresh = cv2.threshold(res, 0, 255, cv2.THRESH_BINARY_INV)
+    res_gray = cv2.bitwise_and(gray, gray, mask = None)
 #######################################################################################################################
 
     # Blurring
 #######################################################################################################################
     # Need to test exactly how useful this is:
-    h, w, = res_thresh.copy().shape[:2]
+
+
+
+    res_adaptThresh = cv2.adaptiveThreshold(res_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 5)
+
+    h, w, = res_adaptThresh.copy().shape[:2]
     blurMask = np.zeros((h + 2, w + 2), np.uint8)
     cv2.floodFill(res_thresh, blurMask, (0, 0), 255)
+
     res_thresh = cv2.blur(res_thresh, (9, 9))
-    res_thresh = cv2.medianBlur(res_thresh, 5)
-    res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 1)
-    # res_thresh = cv2.bitwise_and(res_thresh, res)
-#######################################################################################################################
+    res_thresh = cv2.medianBlur(res_thresh, 49)
+    res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 0)
+    res_thresh = cv2.bitwise_or(res_thresh, res)
+
+    cv2.floodFill(res_thresh,blurMask, (0,0),255)
+
+    #######################################################################################################################
 
     # Contours
 ######################################################################################################################
-    im2, cont, hier = cv2.findContours(mask, 2, 1)
-    _, contours, hierarchy = cv2.findContours(mask, 2, 1)
+    im2, cont, hier = cv2.findContours(res_adaptThresh, 2, 1)
+    _, contours, hierarchy = cv2.findContours(res_adaptThresh, 2, 1)
     cnt = contours
 
     hull = None
@@ -104,8 +131,15 @@ while (True):
 
     cv2.imshow("Original Frame", frame)
     cv2.imshow("HSV", hsv)
-    cv2.imshow("Mask", mask)
+    # cv2.imshow("Mask", mask)
     cv2.imshow("Threshold", res_thresh)
+    cv2.imshow("FloodFill", res_thresh)
+    # cv2.imshow("Blurmask", blurMask)
+    cv2.imshow("GraySCale", res_gray)
+    cv2.imshow("ResAdaptThresh", res_adaptThresh)
+    # cv2.imshow("YCRCB", ycr)
+    cv2.imshow("What?" , ysv)
+
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
         break

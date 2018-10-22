@@ -97,7 +97,7 @@ while(True):
     # Threshold the HSV image to get only blue colors
 
     # mask = cv2.inRange(hsv, skinColorLowerYCRCB, skinColorUpperYCRCB)
-    mask = cv2.inRange(hsv, skinColorLowerE, skinColorUpperE)
+    mask = cv2.inRange(hsv, skinColorLower, skinColorUpper)
     maskOrange = cv2.inRange(hsv, skinColorLowerF, skinColorUpperF)
     maskGreen = cv2.inRange(hsv, skinColorLowerBlue, skinColorUpperBlue)
     mask2 = cv2.inRange(hsv, skinColorLowerD, skinColorUpperD)
@@ -264,6 +264,7 @@ while(True):
     cv2.imshow("Res2" , res2)
     cv2.imshow("maskOrange", maskOrange)
     cv2.imshow("LOL", lol)
+    cv2.imshow("YCRCB", ycr)
 
     # cv2.imshow("resBlurred", res_blurred)
 
