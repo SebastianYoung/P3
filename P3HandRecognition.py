@@ -35,7 +35,7 @@ while (True):
     upperTargetedDarkerColour = np.array([227, 127, 73])
 
     mask = cv2.inRange(hsv, lowerTargetedColour, upperTargetColour)
-    darkerMask = cv2.inRange(ysv, lowerCallibratedColour, upperCallibratedColour)
+    darkerMask = cv2.inRange(hsv + ycr, lowerCallibratedColour, upperCallibratedColour)
     # mask = cv2.inRange(hsv, lowerCallibratedColour, upperCallibratedColour)
 
     res = cv2.bitwise_and(frame, frame, mask = mask)
@@ -53,18 +53,18 @@ while (True):
 
 
 
-    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 5)
+    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 3)
 
     h, w, = res_adaptThresh.copy().shape[:2]
     blurMask = np.zeros((h + 2, w + 2), np.uint8)
-    cv2.floodFill(res_thresh, blurMask, (0, 0), 255)
 
     res_thresh = cv2.blur(res_thresh, (9, 9))
-    res_thresh = cv2.medianBlur(res_thresh, 49)
+    res_thresh = cv2.medianBlur(res_thresh, 9)
     res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 0)
     res_thresh = cv2.bitwise_or(res_thresh, res)
 
-    cv2.floodFill(res_thresh,blurMask, (0,0),255)
+    cv2.floodFill(res_thresh, blurMask, (0, 0), 255)
+
 
     #######################################################################################################################
 
@@ -133,20 +133,19 @@ while (True):
         print(sys.exc_info(), sys.exc_info()[2].tb_lineno)
 ########################################################################################################################
 
-    print(ycr+hsv)
 
     cv2.imshow("Original Frame", frame)
-    cv2.imshow("HSV", hsv)
-    # cv2.imshow("Mask", mask)
-    cv2.imshow("Threshold", res_thresh)
-    cv2.imshow("FloodFill", res_thresh)
-    # cv2.imshow("Blurmask", blurMask)
-    cv2.imshow("GraySCale", res_gray)
-    cv2.imshow("ResAdaptThresh", res_adaptThresh)
+    #cv2.imshow("HSV", hsv)
+    #cv2.imshow("Mask", mask)
+    cv2.imshow("Res_Thresh", res_thresh)
+    #cv2.imshow("Res", res)
+    #cv2.imshow("Blurmask", blurMask)
+    #cv2.imshow("GraySCale", res_gray)
+    #cv2.imshow("ResAdaptThresh", res_adaptThresh)
     # cv2.imshow("YCRCB", ycrcb)
-    cv2.imshow("What?" , ysv)
-    cv2.imshow("Darker Mask", darkerMask)
-    cv2.imshow("Combined Res", finalRes)
+    #cv2.imshow("What?" , ysv)
+    #cv2.imshow("Darker Mask", darkerMask)
+    #cv2.imshow("Combined Res", finalRes)
 
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
