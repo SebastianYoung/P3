@@ -26,6 +26,7 @@ while (True):
 
 
 
+
     if running:
         colour = hsv[330,240]
         running = False
@@ -36,12 +37,13 @@ while (True):
     lowerCallibratedColour = np.array([colour[0], colour[1], colour[2]])
     upperCallibratedColour = np.array([colour[0], colour[1], colour[2]])
 
-    lowerTargetedDarkerColour = np.array([158, 22, 2])
-    upperTargetedDarkerColour = np.array([227, 127, 73])
+    lowerTargetedDarkerColour = np.array([160, 15, 0])
+    upperTargetedDarkerColour = np.array([200, 110, 43])
 
     mask = cv2.inRange(hsv, lowerTargetedColour, upperTargetColour)
-    darkerMask = cv2.inRange(hsv + ycr, lowerCallibratedColour, upperCallibratedColour)
+    darkerMask = cv2.inRange(hsv + ycr, lowerTargetedDarkerColour, upperTargetedDarkerColour)
     # mask = cv2.inRange(hsv, lowerCallibratedColour, upperCallibratedColour)
+    print("Darker mask is equal to: " + str(darkerMask))
 
     res = cv2.bitwise_and(frame, frame, mask = mask)
     finalRes = cv2.bitwise_or(mask, darkerMask, mask=None)
@@ -70,13 +72,14 @@ while (True):
 
     cv2.floodFill(res_thresh, blurMask, (0, 0), 255)
 
+    edges = cv2.Canny(res_gray, 180, 200)
 
     #######################################################################################################################
 
     # Contours
 ######################################################################################################################
-    im2, cont, hier = cv2.findContours(finalRes, 2, 1)
-    _, contours, hierarchy = cv2.findContours(finalRes, 2, 1)
+    im2, cont, hier = cv2.findContours(res_adaptThresh, 2, 1)
+    _, contours, hierarchy = cv2.findContours(res_adaptThresh, 2, 1)
     cnt = contours
 
     hull = None
@@ -90,6 +93,8 @@ while (True):
             area = cv2.contourArea(temp)
             tmh = cv2.convexHull(temp, returnPoints=False)
             tmv = cv2.convexityDefects(temp, tmh)
+            print("temp is equal to: ")
+            print(temp[0][0])
             if area > maxArea and not handFound:
                 try:
                     print("Biggest choice {}, v {}".format(len(tmh), len(tmv)))
@@ -104,6 +109,7 @@ while (True):
         hull = cv2.convexHull(cnt[ci], returnPoints=False)
         hull2 = cv2.convexHull(cnt[ci], returnPoints=True)
         defects = cv2.convexityDefects(cnt[ci], hull)
+
         cnt = cnt[ci]
 
         #print(hull2)
@@ -116,6 +122,7 @@ while (True):
         for i in range(len(hull2)):
             valY += hull2[i][0][1]
         valY = valY / len(hull2)
+
 
         print("valX: {}, len: {}".format(valX, len(hull2)))
 
@@ -152,13 +159,21 @@ while (True):
             tmp_s = start
             tmp_e = end
 
+            print(area)
             # Draw
             cv2.line(frame, start, end, [255, 0, 0], 1)
+            cv2.line(ycr, start, end, [0, 0, 255], 1)
+            # cv2.circle(frame, (start[0], end[0]), [255,0,255], -1)
+            handBound = cv2.inRange(ycr, np.array([0,0,255]), np.array([0,0,255]))
             cv2.line(frame, start, far, [0, 0, 255], 1)
             cv2.line(frame, end, far, [0, 0, 255], 1)
             cv2.circle(frame, far, 3, [0, 200, 0], -1)
             cv2.circle(frame, (int(valX), int(valY)), 10, [0, 0, 0], -1)
+            # cv2.circle(frame, (int(temp[0][0][0]), int(temp[0][0][1])), 10, [0, 0, 0], 1)
             cv2.putText(frame, str(i), (end), 1, 1, (0, 0, 255), 2)
+            M = cv2.moments(contours[0])
+            print("Moment is equal to: ")
+            print(M)
 
             #print("Defects are: " + str(defects[0]))
 
@@ -176,12 +191,14 @@ while (True):
     #cv2.imshow("Res_Thresh", res_thresh)
     #cv2.imshow("Res", res)
     #cv2.imshow("Blurmask", blurMask)
-    #cv2.imshow("GraySCale", res_gray)
+    cv2.imshow("GraySCale", res_gray)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
     cv2.imshow("YCRCB", ycr)
     cv2.imshow("What?" , ysv)
     cv2.imshow("Darker Mask", darkerMask)
     cv2.imshow("Combined Res", finalRes)
+    # cv2.imshow("HandBound", handBound)
+    cv2.imshow("Edges", edges)
 
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
