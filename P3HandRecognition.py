@@ -9,6 +9,7 @@ cap = cv2.VideoCapture(0)
 
 go = False
 running = True
+actualColour = [0,0,0]
 
 
 while (True):
@@ -30,29 +31,32 @@ while (True):
 
     calibrateMask = np.zeros(hsv.shape[:2], np.uint8)
     calibrateMask[190: 290, 270: 370] = 255
-    caliMasked_hsv = cv2.bitwise_and(frame, frame, mask = calibrateMask)
+    caliMasked_hsv = cv2.bitwise_and(hsv, hsv, mask = calibrateMask)
 
     # hist_mask = cv2.calcHist([frame], [0], calibrateMask,[256], [0, 256])
+    key = cv2.waitKey(3) & 0xFF
 
-    color = ('b', 'g', 'r')
-    actualColour = []
-    for each, col in enumerate(color):
-        histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
-        # plt.plot(histr, color=col)
-        print("The maximum value for " + str(col) + " is: ")
-        print(histr.max())
+    if key == ord('c') and running:
+        color = ('b', 'g', 'r')
+        actualColour = []
+        for each, col in enumerate(color):
+            histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
+            # plt.plot(histr, color=col)
+            print("The maximum value for " + str(col) + " is: ")
+            print(histr.max())
 
-        print("The minimum value for " + str(col) + " is: ")
-        print(histr.min())
+            print("The minimum value for " + str(col) + " is: ")
+            print(histr.min())
 
-        for i in range(256):
-            # print(str(i) + ":" + str(histr[i]))
-            if histr[i] == histr.max():
-                # print("This is the highest value for " + str(col) + str(i))
-                actualColour.append(i)
+            for i in range(256):
+                # print(str(i) + ":" + str(histr[i]))
+                if histr[i] == histr.max():
+                    # print("This is the highest value for " + str(col) + str(i))
+                    actualColour.append(i)
 
-        print(actualColour)
-        print(hsv[240, 320])
+            print(actualColour)
+            print(hsv[240, 320])
+        running = False
 
 
     # plt.xlim([0, 256])
@@ -73,8 +77,8 @@ while (True):
     # Target colour ranges
     lowerTargetedColour = np.array([4, 200, 96])
     upperTargetColour = np.array([25, 255, 220])
-    lowerCallibratedColour = np.array([actualColour[0]-4, actualColour[1]-60, actualColour[2]-80])
-    upperCallibratedColour = np.array([actualColour[0]+4, actualColour[1]+60, actualColour[2]+80])
+    lowerCallibratedColour = np.array([actualColour[0]-10, actualColour[1]-100, actualColour[2]-40])
+    upperCallibratedColour = np.array([actualColour[0]+10, actualColour[1]+100, actualColour[2]+40])
 
     lowerTargetedDarkerColour = np.array([160, 15, 0])
     upperTargetedDarkerColour = np.array([200, 110, 43])
@@ -133,13 +137,13 @@ while (True):
             #print(temp[0][0])
             if area > maxArea and not handFound:
                 try:
-                    print("Biggest choice {}, v {}".format(len(tmh), len(tmv)))
+                    # print("Biggest choice {}, v {}".format(len(tmh), len(tmv)))
                     maxArea = area
                     ci = i
                 except:
                     print("err")
             if len(tmh) >= 18 and len(tmh) <= 28:
-                print("Hand contours {}, v {}".format(len(tmh), len(tmv)))
+                # print("Hand contours {}, v {}".format(len(tmh), len(tmv)))
                 handFound = 1
                 ci = i
         hull = cv2.convexHull(cnt[ci], returnPoints=False)
@@ -231,7 +235,7 @@ while (True):
     # cv2.imshow("Darker Mask", darkerMask)
     # cv2.imshow("Combined Res", finalRes)
     # cv2.imshow("HandBound", handBound)
-    cv2.imshow("Calimasked", calibrateMask)
+    # cv2.imshow("Calimasked", calibrateMask)
 
 
     k = cv2.waitKey(5) & 0xFF
