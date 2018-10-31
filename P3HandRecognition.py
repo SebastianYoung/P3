@@ -36,7 +36,7 @@ while (True):
     # hist_mask = cv2.calcHist([frame], [0], calibrateMask,[256], [0, 256])
     key = cv2.waitKey(3) & 0xFF
 
-    if key == ord('c') and running:
+    if key == ord('c'):
         color = ('b', 'g', 'r')
         actualColour = []
         for each, col in enumerate(color):
@@ -56,7 +56,6 @@ while (True):
 
             print(actualColour)
             print(hsv[240, 320])
-        running = False
 
 
     # plt.xlim([0, 256])
