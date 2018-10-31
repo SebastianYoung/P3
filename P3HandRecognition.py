@@ -1,129 +1,154 @@
 import cv2
 import numpy as np
 import sys
-from matplotlib import pyplot as plt
-
-
 
 cap = cv2.VideoCapture(0)
 
 go = False
-running = True
-actualColour = [0,0,0]
+actualColour = [0, 0, 0]
 
 
-while (True):
+while True:
 
     _, frame = cap.read()
 
-    # Converts the video capture to HSV
-
+    # Flips the Image for Gab
     frame = cv2.flip(frame, 1)
 
+    # Converts the video capture to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    ycr = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
-    ysv = hsv + ycr
 
-    # cv2.circle(frame, (cX, cY), 3, [255, 255, 0], -1)
+########################################################################################################################
+#                                                                                                                      #
+#                                                  Calibration                                                         #
+#                                                                                                                      #
+#                                                                                                                      #
+#                                                                                                                      #
+########################################################################################################################
+
+    # Draws the rectangle we use for calibration in the Original Frame
     cv2.rectangle(frame, (270, 190), (370, 290), [0, 0, 255], 1)
 
-
-
+    # Creates an array with the axis of the HSV capture
     calibrateMask = np.zeros(hsv.shape[:2], np.uint8)
+
+    # Creates 255 bins for the Array within a 100 x 100 area starting at x =  190, y = 270
     calibrateMask[190: 290, 270: 370] = 255
+
+    # Creates an src with the mask over the HSV capture
     caliMasked_hsv = cv2.bitwise_and(hsv, hsv, mask = calibrateMask)
 
-    # hist_mask = cv2.calcHist([frame], [0], calibrateMask,[256], [0, 256])
+    # Waits for input
     key = cv2.waitKey(3) & 0xFF
 
+    # Specifies that the key input should be 'c'
     if key == ord('c'):
-        color = ('b', 'g', 'r')
+
+        # Creates a Struct (Structure) for color which are 'b', 'g', 'r'
+        colour = ('b', 'g', 'r')
+
+        # Creates an empty array name actualColour which will later be used to store 3 values.
         actualColour = []
-        for each, col in enumerate(color):
+
+        # For loop which enumerates (Allows for loops over something with an automatic counter)
+        for each, col in enumerate(colour):
+
+            # Creates a variable which holds the histogram of the area in calibrateMask between the values of 0 and 256
             histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
-            # plt.plot(histr, color=col)
+
+            # For testing and adjusting values
             print("The maximum value for " + str(col) + " is: ")
             print(histr.max())
-
             print("The minimum value for " + str(col) + " is: ")
             print(histr.min())
 
+            # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
+            # histogram, then append that value to the array actualColour.
             for i in range(256):
-                # print(str(i) + ":" + str(histr[i]))
                 if histr[i] == histr.max():
                     # print("This is the highest value for " + str(col) + str(i))
                     actualColour.append(i)
 
+            # For testing and adjusting values in the calibration
             print(actualColour)
             print(hsv[240, 320])
 
+########################################################################################################################
+#                                                                                                                      #
+#                                                    Isolating                                                         #
+#                                                                                                                      #
+#                                                                                                                      #
+#                                                                                                                      #
+########################################################################################################################
 
-    # plt.xlim([0, 256])
-
-    # plt.show()
-
-   #  key = cv2.waitKey(5) & 0xFF
-
-
-    #if key == 255 and running:
-    #    for x in range(270, 370):
-    #        for y in range(190, 290):
-    #            colour = hsv[x, y]
-    #            print("I HAVE REACHED THIS CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    #print("Key is equal to: " + str(key))
-    #print("Colour is equal to: " + str(colour))
-
-    # Target colour ranges
-    lowerTargetedColour = np.array([4, 200, 96])
-    upperTargetColour = np.array([25, 255, 220])
-    lowerCallibratedColour = np.array([actualColour[0]-10, actualColour[1]-100, actualColour[2]-40])
-    upperCallibratedColour = np.array([actualColour[0]+10, actualColour[1]+100, actualColour[2]+40])
-
-    lowerTargetedDarkerColour = np.array([160, 15, 0])
-    upperTargetedDarkerColour = np.array([200, 110, 43])
-
+    # Old Colour ranges values for Young's webcam on Yellow. Don't Delete
+    # lowerTargetedColour = np.array([4, 200, 96])
+    # upperTargetColour = np.array([25, 255, 220])
     # mask = cv2.inRange(hsv, lowerTargetedColour, upperTargetColour)
-    darkerMask = cv2.inRange(hsv + ycr, lowerTargetedDarkerColour, upperTargetedDarkerColour)
-    mask = cv2.inRange(hsv, lowerCallibratedColour, upperCallibratedColour)
 
+    # The current colour ranges used for calibration
+    lowerCalibratedColour = np.array([actualColour[0]-10, actualColour[1]-100, actualColour[2]-40])
+    upperCalibratedColour = np.array([actualColour[0]+10, actualColour[1]+100, actualColour[2]+40])
+
+    # Creates a mask (an Array) within the range of the lower colour ranges (lowerCalibratedColour) and the upper colour
+    # ranges (upperCalibratedColour) for HSV
+    mask = cv2.inRange(hsv, lowerCalibratedColour, upperCalibratedColour)
+
+    # Bitwise conjunction with the mask
     res = cv2.bitwise_and(frame, frame, mask = mask)
-    finalRes = cv2.bitwise_or(mask, darkerMask, mask=None)
 
+    # Does nothing at the moment but the 2nd argument here is where we can put the callibrated shadows
+    finalRes = cv2.bitwise_or(mask, mask, mask=None)
+
+    # Converts our res to Gray from BGR
     gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
 
+    # Thresholds the image an inverses it so the only thing left are our hand
     thresh, res_thresh = cv2.threshold(res, 0, 255, cv2.THRESH_BINARY_INV)
-    res_gray = cv2.bitwise_and(gray, gray, mask = None)
-#######################################################################################################################
 
-    # Blurring
-#######################################################################################################################
-    # Need to test exactly how useful this is:
+########################################################################################################################
+#                                                                                                                      #
+#                                                   Blurring                                                           #
+#                                                                                                                      #
+#                                                                                                                      #
+#                                                                                                                      #
+########################################################################################################################
 
-    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 3)
+    # This adaptThreshold creates an outline similar to how Edge Detection would
+    # This is used to find the contours in the users hand
+    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 2)
 
-    h, w, = res_adaptThresh.copy().shape[:2]
+    # Creates 2 variables h & w which each corresponds to the shape of the above adaptThresh's x and y axis
+    h, w, = res_adaptThresh.shape[:2]
+
+    # Creates an array to create an area which should be blurred out
     blurMask = np.zeros((h + 2, w + 2), np.uint8)
 
+    # Various blurring methods
     res_thresh = cv2.blur(res_thresh, (13, 13))
     res_thresh = cv2.medianBlur(res_thresh, 19)
     res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 0)
     res_thresh = cv2.bitwise_or(res_thresh, res)
 
+    # Fills out the holes in the blurred image
     cv2.floodFill(res_thresh, blurMask, (0, 0), 255)
 
-    edges = cv2.Canny(res_gray, 180, 200)
+########################################################################################################################
+#                                                                                                                      #
+#                                                   Boundary                                                           #
+#                                                                                                                      #
+#                                                                                                                      #
+#                                                                                                                      #
+########################################################################################################################
 
-    #######################################################################################################################
 
-    # Contours
-######################################################################################################################
-    im2, cont, hier = cv2.findContours(res_adaptThresh, 2, 1)
-    _, contours, hierarchy = cv2.findContours(res_adaptThresh, 2, 1)
-    cnt = contours
 
-    hull = None
-    defects = None
-    ci = 0
+    # The _ in the beginning indicate that we do not want to store the first output of this function.
+    # The function uses an algorithm developed by by Satoshi Suzuki and Keiichi Abe in 1985.
+    # We do not need to explain exactly how this algorithm works.
+
+    _, cnt, _ = cv2.findContours(res_adaptThresh, 2, 1)
+
     if (len(cnt) > 0):
         maxArea = -1
         handFound = 0
@@ -183,9 +208,7 @@ while (True):
 
             # Draw
             cv2.line(frame, start, end, [255, 0, 0], 1)
-            cv2.line(ycr, start, end, [0, 0, 255], 1)
 
-            handBound = cv2.inRange(ycr, np.array([0,0,255]), np.array([0,0,255]))
             cv2.line(frame, start, far, [0, 0, 255], 1)
             cv2.line(frame, end, far, [0, 0, 255], 1)
             cv2.circle(frame, far, 3, [0, 200, 0], -1)
@@ -199,8 +222,8 @@ while (True):
 
             # print("Hand contours {}, v {}".format(len(tmh), len(tmv)))
 
-            distRatioX = cX / start[0]
-            distRatioY = cY / start[1]
+            distRatioX = cX / (start[0] + 1)
+            distRatioY = cY / (start[1] + 1)
 
             # distRatioX = np.linalg.norm((cX - start[0]))
             # distRatioY = np.linalg.norm((cY - start[1]))
@@ -221,21 +244,9 @@ while (True):
 
     cv2.imshow("Original Frame", frame)
     cv2.imshow("HSV", hsv)
-    # cv2.imshow("HSVFULL", hsvfull)
-    # cv2.imshow("Difference", difference)
     cv2.imshow("Mask", mask)
-    # cv2.imshow("Res_Thresh", res_thresh)
-    # cv2.imshow("Res", res)
-    # cv2.imshow("Blurmask", blurMask)
-    # cv2.imshow("GraySCale", res_gray)
-    # cv2.imshow("ResAdaptThresh", res_adaptThresh)
-    # cv2.imshow("YCRCB", ycr)
-    # cv2.imshow("What?" , ysv)
+    cv2.imshow("ResAdaptThresh", res_adaptThresh)
     # cv2.imshow("Darker Mask", darkerMask)
-    # cv2.imshow("Combined Res", finalRes)
-    # cv2.imshow("HandBound", handBound)
-    # cv2.imshow("Calimasked", calibrateMask)
-
 
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
