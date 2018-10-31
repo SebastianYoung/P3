@@ -146,36 +146,37 @@ while True:
     # The _ in the beginning indicate that we do not want to store the first output of this function.
     # The function uses an algorithm developed by by Satoshi Suzuki and Keiichi Abe in 1985.
     # We do not need to explain exactly how this algorithm works.
-
     _, cnt, _ = cv2.findContours(res_adaptThresh, 2, 1)
 
+    #
     if (len(cnt) > 0):
         maxArea = -1
-        handFound = 0
+        handFound = False
         for i in range(len(cnt)):
             temp = cnt[i]
             area = cv2.contourArea(temp)
             tmh = cv2.convexHull(temp, returnPoints=False)
             tmv = cv2.convexityDefects(temp, tmh)
-            #print("temp is equal to: ")
-            #print(temp[0][0])
+
             if area > maxArea and not handFound:
                 try:
-                    # print("Biggest choice {}, v {}".format(len(tmh), len(tmv)))
                     maxArea = area
                     ci = i
                 except:
                     print("err")
             if len(tmh) >= 18 and len(tmh) <= 28:
-                # print("Hand contours {}, v {}".format(len(tmh), len(tmv)))
-                handFound = 1
+                handFound = True
                 ci = i
         hull = cv2.convexHull(cnt[ci], returnPoints=False)
-        hull2 = cv2.convexHull(cnt[ci], returnPoints=True)
         defects = cv2.convexityDefects(cnt[ci], hull)
 
         cnt = cnt[ci]
 
+    ####################################################################################################################
+    #                                                      Boundary                                                    #
+    #                                                      Defects                                                     #
+    #                                                                                                                  #
+    ####################################################################################################################
 
     try:
         for i in range(defects.shape[0]):
@@ -185,62 +186,54 @@ while True:
             far = tuple(cnt[f][0])
 
             if go:
-                #diff_s1 = abs(tmp_s[0] - start[0])
-                #diff_s2 = abs(tmp_s[1] - start[1])
-                #diff_e1 = abs(tmp_e[0] - end[0])
-                #diff_e2 = abs(tmp_e[1] - end[1])
+
                 diff_s1 = np.linalg.norm((tmp_s[0] - start[0]))
                 diff_s2 = np.linalg.norm((tmp_s[1] - start[1]))
                 diff_e1 = np.linalg.norm((tmp_e[0] - end[0]))
                 diff_e2 = np.linalg.norm((tmp_e[1] - end[1]))
                 glob = diff_s1 + diff_s2 + diff_e1 + diff_e2
-                # print("{} {} {} {}, {}".format(diff_s1, diff_s2, diff_e1, diff_e2, glob))
                 dist = 3
-                # if (diff_s1 <= dist) or (diff_s2 <= dist) or (diff_e1 <= dist) or (diff_e2 <= dist):
-                if (glob <= dist):
-                    print("Skipping")
+                if glob <= dist:
                     continue
-            # print("drawing")
             tmp_s = start
             tmp_e = end
 
-
-
-            # Draw
+            ############################################################################################################
+            #                                              Boundary                                                    #
+            #                                              Drawing                                                     #
+            #                                                                                                          #
+            ############################################################################################################
             cv2.line(frame, start, end, [255, 0, 0], 1)
 
             cv2.line(frame, start, far, [0, 0, 255], 1)
             cv2.line(frame, end, far, [0, 0, 255], 1)
             cv2.circle(frame, far, 3, [0, 200, 0], -1)
 
-            cv2.putText(frame, str(i), (end), 1, 1, (0, 0, 255), 2)
+            cv2.putText(frame, str(i), end, 1, 1, (0, 0, 255), 2)
             M = cv2.moments(cnt)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
             cv2.putText(frame, "Center", (cX - 25, cY - 10), 1, 1, (0, 0, 255), 2)
             cv2.circle(frame, (cX, cY), 3, [255, 255, 0], -1)
 
-            # print("Hand contours {}, v {}".format(len(tmh), len(tmv)))
-
             distRatioX = cX / (start[0] + 1)
             distRatioY = cY / (start[1] + 1)
-
-            # distRatioX = np.linalg.norm((cX - start[0]))
-            # distRatioY = np.linalg.norm((cY - start[1]))
 
 
             if (i) > 15:
                 cv2.line(frame, (cX, cY), start, [255,255,255], 1)
 
-            # print("cX / start[0] is equal to :" + str(distRatioX) + "for " + str(i))
-            # print("cY / start[1] is equal to :"  + str(distRatioY) + "for " + str(i))
-
-
             go = True
     except Exception as e:
         print(sys.exc_info(), sys.exc_info()[2].tb_lineno)
-########################################################################################################################
 
+########################################################################################################################
+#                                                                                                                      #
+#                                                 Showing Windows                                                      #
+#                                                                                                                      #
+#                                                                                                                      #
+#                                                                                                                      #
+########################################################################################################################
 
     cv2.imshow("Original Frame", frame)
     cv2.imshow("HSV", hsv)
