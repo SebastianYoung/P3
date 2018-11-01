@@ -6,6 +6,8 @@ cap = cv2.VideoCapture(0)
 
 go = False
 actualColour = [0, 0, 0]
+actualShadowColour = [0, 0, 0]
+# actualFingerColour = [0, 0, 0]
 
 
 while True:
@@ -17,6 +19,7 @@ while True:
 
     # Converts the video capture to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    # hls = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -25,6 +28,86 @@ while True:
 #                                                                                                                      #
 #                                                                                                                      #
 ########################################################################################################################
+
+    ### HLS ###
+    # Draws the rectangle we use for calibration in the Original Frame
+#    cv2.rectangle(frame, (270, 190), (370, 290), [0, 0, 255], 1)
+
+#    cv2.rectangle(frame, (270,100), (290, 130), [0, 0, 255], 1)
+
+    # Creates an array with the axis of the HSV capture
+#    calibrateMask = np.zeros(hls.shape[:2], np.uint8)
+
+#    fingerMask = np.zeros(hls.shape[:2], np.uint8)
+
+    # Creates 255 bins for the Array within a 100 x 100 area starting at x =  190, y = 270
+#    calibrateMask[190: 290, 270: 370] = 255
+
+#    fingerMask[100: 130, 270: 290] = 255
+
+
+
+    # Creates an src with the mask over the HSV capture
+#    caliMasked_hls = cv2.bitwise_and(hls, hls, mask=calibrateMask)
+
+#    fingerMasked_hls = cv2.bitwise_and(hls, hls, mask= fingerMask)
+
+    # Waits for input
+#    key = cv2.waitKey(3) & 0xFF
+
+    # Specifies that the key input should be 'c'
+#    if key == ord('c'):
+
+        # Creates a Struct (Structure) for color which are 'b', 'g', 'r'
+#        colour = ('b', 'g', 'r')
+#        fingerColour = ('b', 'g', 'r')
+
+        # Creates an empty array name actualColour which will later be used to store 3 values.
+#        actualColour = []
+#        actualFingerColour = []
+
+        # For loop which enumerates (Allows for loops over something with an automatic counter)
+#        for each, col in enumerate(colour):
+
+            # Creates a variable which holds the histogram of the area in calibrateMask between the values of 0 and 256
+#            histr = cv2.calcHist([caliMasked_hls], [each], calibrateMask, [256], [0, 256])
+
+            # For testing and adjusting values
+#            print("The maximum value for " + str(col) + " is: ")
+#            print(histr.max())
+#            print("The minimum value for " + str(col) + " is: ")
+#            print(histr.min())
+
+            # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
+            # histogram, then append that value to the array actualColour.
+#            for i in range(256):
+#                if histr[i] == histr.max():
+                    # print("This is the highest value for " + str(col) + str(i))
+#                    actualColour.append(i)
+
+            # For testing and adjusting values in the calibration
+#            print(actualColour)
+#            print(hls[240, 320])
+
+#        for each, col in enumerate(fingerColour):
+
+            # Creates a variable which holds the histogram of the area in calibrateMask between the values of 0 and 256
+#            fingerhistr = cv2.calcHist([fingerMasked_hls], [each], fingerMask, [256], [0, 256])
+
+            # For testing and adjusting values
+#            print("The maximum value for " + str(col) + " is: ")
+#            print(fingerhistr.max())
+#            print("The minimum value for " + str(col) + " is: ")
+#            print(fingerhistr.min())
+
+            # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
+            # histogram, then append that value to the array actualColour.
+#            for i in range(256):
+#                if fingerhistr[i] == fingerhistr.max():
+                    # print("This is the highest value for " + str(col) + str(i))
+#                    actualFingerColour.append(i)
+
+    ### HSV ###
 
     # Draws the rectangle we use for calibration in the Original Frame
     cv2.rectangle(frame, (270, 190), (370, 290), [0, 0, 255], 1)
@@ -73,6 +156,40 @@ while True:
             print(actualColour)
             print(hsv[240, 320])
 
+    key = cv2.waitKey(3) & 0xFF
+
+    # Specifies that the key input should be 'c'
+    if key == ord('s'):
+
+        # Creates a Struct (Structure) for color which are 'b', 'g', 'r'
+        shadowColour = ('b', 'g', 'r')
+
+        # Creates an empty array name actualColour which will later be used to store 3 values.
+        actualShadowColour = []
+
+        # For loop which enumerates (Allows for loops over something with an automatic counter)
+        for each, col in enumerate(shadowColour):
+
+            # Creates a variable which holds the histogram of the area in calibrateMask between the values of 0 and 256
+            histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
+
+            # For testing and adjusting values
+            print("The maximum value for " + str(col) + " is: ")
+            print(histr.max())
+            print("The minimum value for " + str(col) + " is: ")
+            print(histr.min())
+
+            # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
+            # histogram, then append that value to the array actualColour.
+            for i in range(256):
+                if histr[i] == histr.max():
+                    # print("This is the highest value for " + str(col) + str(i))
+                    actualShadowColour.append(i)
+
+            # For testing and adjusting values in the calibration
+            print(actualShadowColour)
+            print(hsv[240, 320])
+
 ########################################################################################################################
 #                                                                                                                      #
 #                                                    Isolating                                                         #
@@ -86,25 +203,37 @@ while True:
     # upperTargetColour = np.array([25, 255, 220])
     # mask = cv2.inRange(hsv, lowerTargetedColour, upperTargetColour)
 
+    ### HLS ###
     # The current colour ranges used for calibration
-    lowerCalibratedColour = np.array([actualColour[0]-10, actualColour[1]-100, actualColour[2]-40])
-    upperCalibratedColour = np.array([actualColour[0]+10, actualColour[1]+100, actualColour[2]+40])
+    lowerCalibratedColour = np.array([actualColour[0] - 10, actualColour[1] - 20, actualColour[2] - 30])
+    upperCalibratedColour = np.array([actualColour[0] + 10, actualColour[1] + 20, actualColour[2] + 30])
+
+    lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 10, actualShadowColour[1] - 20, actualShadowColour[2] - 30])
+    upperCalibratedShadowColour = np.array([actualShadowColour[0] + 10, actualShadowColour[1] + 20, actualShadowColour[2] + 30])
+
+    ### HSV ###
+    # The current colour ranges used for calibration
+#    lowerCalibratedColour = np.array([actualColour[0]-10, actualColour[1]-100, actualColour[2]-40])
+#    upperCalibratedColour = np.array([actualColour[0]+10, actualColour[1]+100, actualColour[2]+40])
 
     # Creates a mask (an Array) within the range of the lower colour ranges (lowerCalibratedColour) and the upper colour
     # ranges (upperCalibratedColour) for HSV
     mask = cv2.inRange(hsv, lowerCalibratedColour, upperCalibratedColour)
+    mask2 = cv2.inRange(hsv, lowerCalibratedShadowColour, upperCalibratedShadowColour)
 
     # Bitwise conjunction with the mask
     res = cv2.bitwise_and(frame, frame, mask = mask)
+    res2 = cv2.bitwise_and(frame, frame, mask = mask2)
 
     # Does nothing at the moment but the 2nd argument here is where we can put the callibrated shadows
-    finalRes = cv2.bitwise_or(mask, mask, mask=None)
+    finalRes = cv2.bitwise_or(mask, mask2, mask=None)
 
     # Converts our res to Gray from BGR
     gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
 
     # Thresholds the image an inverses it so the only thing left are our hand
     thresh, res_thresh = cv2.threshold(res, 0, 255, cv2.THRESH_BINARY_INV)
+
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -132,6 +261,9 @@ while True:
 
     # Fills out the holes in the blurred image
     cv2.floodFill(res_thresh, blurMask, (0, 0), 255)
+
+    edges = cv2.Canny(res_thresh, 50, 200)
+
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -239,6 +371,10 @@ while True:
     cv2.imshow("HSV", hsv)
     cv2.imshow("Mask", mask)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
+    cv2.imshow("Edges", edges)
+    #cv2.imshow("HLS", hls)
+    #cv2.imshow("Both?", hls - hsv)
+    # cv2.imshow("FingerMask", mask2)
     # cv2.imshow("Darker Mask", darkerMask)
 
     k = cv2.waitKey(5) & 0xFF
