@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 import sys
+# Import RPS module
+sys.path.insert(0, 'interactive-software/')
+import RPS
 
 cap = cv2.VideoCapture(0)
 
@@ -366,6 +369,11 @@ while True:
 #                                                                                                                      #
 #                                                                                                                      #
 ########################################################################################################################
+
+    # RPS module
+    RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
+    RPS.IS(frame)
+    # ----------
 
     cv2.imshow("Original Frame", frame)
     cv2.imshow("HSV", hsv)
