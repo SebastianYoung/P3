@@ -2,8 +2,9 @@ import cv2
 import numpy as np
 import sys
 # Import RPS module
+import math
 sys.path.insert(0, 'interactive-software/')
-import RPS
+# import RPS
 
 cap = cv2.VideoCapture(0)
 
@@ -14,8 +15,8 @@ actualShadowColour = [0, 0, 0]
 # actualFingerColour = [0, 0, 0]
 
 
-minlen = 18
-maxlen = 28
+minlen = 32
+maxlen = 62
 
 
 while True:
@@ -303,15 +304,14 @@ while True:
     if testKey == ord('*'):
         maxlen = maxlen - 1
         print("maxlen: " + str(maxlen))
-    ########################################################################################################################
+
+########################################################################################################################
 #                                                                                                                      #
 #                                                   Boundary                                                           #
 #                                                                                                                      #
 #                                                                                                                      #
 #                                                                                                                      #
 ########################################################################################################################
-
-
 
     # The _ in the beginning indicate that we do not want to store the first output of this function.
     # The function uses an algorithm developed by by Satoshi Suzuki and Keiichi Abe in 1985.
@@ -387,18 +387,23 @@ while True:
             cv2.circle(frame, (cX, cY), 3, [255, 255, 0], -1)
             bounding_rect = cv2.boundingRect(cnt[i])
 
-            rect = frame(bounding_rect).clone()
-            cv2.imshow("Bounding Box", rect)
+
+            # rect = frame(bounding_rect).clone()
+            # cv2.imshow("Bounding Box", rect)
 
             #for x in range(len(hullMask[0])):
             #    for y in range(len(hullMask[1])):
-            #        print("cnt is equal to: " + str(cnt[0][0][0]))
+             #       print("cnt is equal to: " + str(cnt[0][0][0]))
                     # hullMask[x][0] = cnt[0][0][0]
                     # hullMask[0][y] = cnt[0][0][1]
                     # print("HullMask is equal to: " + str(hullMask))
                     # hullMask[x,y] = [255, 255, 255]
 
-            if (i) > 15:
+            centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
+            # print(cX)
+            print("The Euclidian distance of: " + str(i) + "is: " + str(centdis))
+
+            if (centdis) < 100:
                 cv2.line(frame, (cX, cY), start, [255,255,255], 1)
 
 
@@ -408,32 +413,48 @@ while True:
 
 ########################################################################################################################
 #                                                                                                                      #
+#                                                                                                                      #
+#                                             Young Trying Weird Shit                                                  #
+#                                                                                                                      #
+#                                                                                                                      #
+########################################################################################################################
+
+
+
+
+########################################################################################################################
+#                                                                                                                      #
 #                                                 Showing Windows                                                      #
 #                                                                                                                      #
 #                                                                                                                      #
 #                                                                                                                      #
 ########################################################################################################################
 
+
+
     # RPS module
-    RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
-    RPS.IS(frame)
+    # RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
+    # RPS.IS(frame)
     # ----------
 
     cv2.imshow("Original Frame", frame)
-    cv2.imshow("HSV", hsv)
-    cv2.imshow("res", res)
-    cv2.imshow("Res2", res2)
+    # cv2.imshow("HSV", hsv)
+    # cv2.imshow("res", res)
+    # cv2.imshow("Res2", res2)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
-    cv2.imshow("Edges", edges)
-    cv2.imshow("FinalRes", finalRes)
+    # cv2.imshow("Edges", edges)
+    # cv2.imshow("FinalRes", finalRes)
 
-    #cv2.imshow("HLS", hls)
-    #cv2.imshow("Both?", hls - hsv)
+    # cv2.imshow("HLS", hls)
+    # cv2.imshow("Both?", hls - hsv)
     # cv2.imshow("FingerMask", mask2)
     # cv2.imshow("Darker Mask", darkerMask)
-    cv2.imshow("Grey", gray)
-    cv2.imshow("finalThresh", finalThresh)
+    # cv2.imshow("Grey", gray)
+    # cv2.imshow("finalThresh", finalThresh)
     # cv2.imshow("HullMask", hullMask)
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
         break
+
+
+
