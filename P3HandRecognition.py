@@ -464,31 +464,11 @@ while True:
     # ----------
 
     cv2.imshow("Original Frame", frame)
-<<<<<<< HEAD
-    #cv2.imshow("HSV", hsv)
-    #cv2.imshow("Mask", mask)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
-    #cv2.imshow("Edges", edges)
     cv2.imshow("res_thresh", res_thresh)
     cv2.imshow('final', finalRes)
-    #cv2.imshow("HLS", hls)
-    #cv2.imshow("Both?", hls - hsv)
-=======
-    # cv2.imshow("HSV", hsv)
-    # cv2.imshow("res", res)
-    # cv2.imshow("Res2", res2)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
-    # cv2.imshow("Edges", edges)
-    # cv2.imshow("FinalRes", finalRes)
 
-    # cv2.imshow("HLS", hls)
-    # cv2.imshow("Both?", hls - hsv)
->>>>>>> cd152c14e3a0ed1b75c0aa83e924dd1d0e9960a8
-    # cv2.imshow("FingerMask", mask2)
-    # cv2.imshow("Darker Mask", darkerMask)
-    # cv2.imshow("Grey", gray)
-    # cv2.imshow("finalThresh", finalThresh)
-    # cv2.imshow("HullMask", hullMask)
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
         break
