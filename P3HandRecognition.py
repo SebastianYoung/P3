@@ -2,15 +2,21 @@ import cv2
 import numpy as np
 import sys
 # Import RPS module
+import math
 sys.path.insert(0, 'interactive-software/')
-import RPS
+# import RPS
 
 cap = cv2.VideoCapture(0)
 
 go = False
+start = True
 actualColour = [0, 0, 0]
 actualShadowColour = [0, 0, 0]
 # actualFingerColour = [0, 0, 0]
+
+
+minlen = 32
+maxlen = 62
 
 
 while True:
@@ -22,8 +28,12 @@ while True:
 
     # Converts the video capture to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    ycbcr = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
     # hls = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
 
+    if start:
+        hullMask = np.zeros_like(frame)
+        start = False
 ########################################################################################################################
 #                                                                                                                      #
 #                                                  Calibration                                                         #
@@ -32,7 +42,7 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
-    ### HLS ###
+    ### YCBCR ###
     # Draws the rectangle we use for calibration in the Original Frame
 #    cv2.rectangle(frame, (270, 190), (370, 290), [0, 0, 255], 1)
 
@@ -112,7 +122,7 @@ while True:
 
     ### HSV ###
 
-    # Draws the rectangle we use for calibration in the Original Frame
+#    # Draws the rectangle we use for calibration in the Original Frame
     cv2.rectangle(frame, (270, 190), (370, 290), [0, 0, 255], 1)
 
     # Creates an array with the axis of the HSV capture
@@ -145,8 +155,7 @@ while True:
             # For testing and adjusting values
             print("The maximum value for " + str(col) + " is: ")
             print(histr.max())
-            print("The minimum value for " + str(col) + " is: ")
-            print(histr.min())
+
 
             # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
             # histogram, then append that value to the array actualColour.
@@ -159,7 +168,7 @@ while True:
             print(actualColour)
             print(hsv[240, 320])
 
-    key = cv2.waitKey(3) & 0xFF
+    key = cv2.waitKey(5) & 0xFF
 
     # Specifies that the key input should be 'c'
     if key == ord('s'):
@@ -191,7 +200,7 @@ while True:
 
             # For testing and adjusting values in the calibration
             print(actualShadowColour)
-            print(hsv[240, 320])
+            print("This is the ycbcr thingy: " + str(ycbcr[240, 320]))
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -208,11 +217,12 @@ while True:
 
     ### HLS ###
     # The current colour ranges used for calibration
-    lowerCalibratedColour = np.array([actualColour[0] - 10, actualColour[1] - 20, actualColour[2] - 30])
-    upperCalibratedColour = np.array([actualColour[0] + 10, actualColour[1] + 20, actualColour[2] + 30])
+    lowerCalibratedColour = np.array([actualColour[0] - 5, actualColour[1] - 10, actualColour[2] - 15])
+    upperCalibratedColour = np.array([actualColour[0] + 5, actualColour[1] + 10, actualColour[2] + 15])
 
-    lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 10, actualShadowColour[1] - 20, actualShadowColour[2] - 30])
-    upperCalibratedShadowColour = np.array([actualShadowColour[0] + 10, actualShadowColour[1] + 20, actualShadowColour[2] + 30])
+    lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 5, actualShadowColour[1] - 10, actualShadowColour[2] - 15])
+    upperCalibratedShadowColour = np.array([actualShadowColour[0] + 5, actualShadowColour[1] + 10, actualShadowColour[2] + 15])
+
 
     ### HSV ###
     # The current colour ranges used for calibration
@@ -234,8 +244,20 @@ while True:
     # Converts our res to Gray from BGR
     gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
 
+
     # Thresholds the image an inverses it so the only thing left are our hand
     thresh, res_thresh = cv2.threshold(res, 0, 255, cv2.THRESH_BINARY_INV)
+    thresh2, res_thresh2 = cv2.threshold(res2, 0, 255, cv2.THRESH_BINARY_INV)
+
+    finalres = cv2.bitwise_or(res, res2, mask=None)
+
+    thresh3, finalThresh = cv2.threshold(finalres, 0, 255, cv2.THRESH_BINARY_INV)
+
+
+    edges = cv2.Canny(finalres, 50, 200)
+
+
+
 
 
 ########################################################################################################################
@@ -250,23 +272,63 @@ while True:
     # This is used to find the contours in the users hand
     res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 2)
 
+
+
     # Creates 2 variables h & w which each corresponds to the shape of the above adaptThresh's x and y axis
     h, w, = res_adaptThresh.shape[:2]
 
     # Creates an array to create an area which should be blurred out
     blurMask = np.zeros((h + 2, w + 2), np.uint8)
 
+    #choose connectivity type, either 4 or 8
+    #connectivity = 4
+    #perform operation
+    #output = cv2.connectedComponentsWithStats(thresh, connectivity, cv2.CV_32S)
+    #Get Result:
+    #first cell is the number of labels
+    #num_labels = output[0]
+    #second cell is the label matrix
+    #labels = output[1]
+    #third cell is the stat matrix
+    #stats = output[2]
+    #fourth cell is the centroid matrix
+    #centroids = output[3]
+
+	#for i in range(len(stats)): 
+	#	stats[i, 4]
+
+	
+
+
     # Various blurring methods
-    res_thresh = cv2.blur(res_thresh, (13, 13))
-    res_thresh = cv2.medianBlur(res_thresh, 19)
-    res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 0)
-    res_thresh = cv2.bitwise_or(res_thresh, res)
+    #res_thresh = cv2.blur(res_thresh, (13, 13))
+    res_thresh = cv2.medianBlur(res_thresh, 9)
+    #res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 0)
+    #res_thresh = cv2.bitwise_or(res_thresh, res)
 
     # Fills out the holes in the blurred image
     cv2.floodFill(res_thresh, blurMask, (0, 0), 255)
 
-    edges = cv2.Canny(res_thresh, 50, 200)
+    rat = cv2.adaptiveThreshold(edges, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 2)
 
+
+    testKey = cv2.waitKey(3) & 0xFF
+
+    # Specifies that the key input should be 'c'
+    if testKey == ord('+'):
+        minlen = minlen + 1
+        print("minlen: " + str(minlen))
+
+    if testKey == ord('-'):
+        minlen = minlen - 1
+        print("minlen: " + str(minlen))
+
+    if testKey == ord('/'):
+        maxlen = maxlen + 1
+        print("maxlen: " + str(maxlen))
+    if testKey == ord('*'):
+        maxlen = maxlen - 1
+        print("maxlen: " + str(maxlen))
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -276,13 +338,12 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
-
-
     # The _ in the beginning indicate that we do not want to store the first output of this function.
     # The function uses an algorithm developed by by Satoshi Suzuki and Keiichi Abe in 1985.
     # We do not need to explain exactly how this algorithm works.
-    _, cnt, _ = cv2.findContours(res_adaptThresh, 2, 1)
+    _, cnt, _ = cv2.findContours(rat, 2, 1)
 
+ 	
     #
     if (len(cnt) > 0):
         maxArea = -1
@@ -299,7 +360,7 @@ while True:
                     ci = i
                 except:
                     print("err")
-            if len(tmh) >= 18 and len(tmh) <= 28:
+            if len(tmh) >= minlen and len(tmh) <= maxlen:
                 handFound = True
                 ci = i
         hull = cv2.convexHull(cnt[ci], returnPoints=False)
@@ -350,17 +411,42 @@ while True:
             cY = int(M["m01"] / M["m00"])
             cv2.putText(frame, "Center", (cX - 25, cY - 10), 1, 1, (0, 0, 255), 2)
             cv2.circle(frame, (cX, cY), 3, [255, 255, 0], -1)
-
-            distRatioX = cX / (start[0] + 1)
-            distRatioY = cY / (start[1] + 1)
+            bounding_rect = cv2.boundingRect(cnt[i])
 
 
-            if (i) > 15:
+            # rect = frame(bounding_rect).clone()
+            # cv2.imshow("Bounding Box", rect)
+
+            #for x in range(len(hullMask[0])):
+            #    for y in range(len(hullMask[1])):
+             #       print("cnt is equal to: " + str(cnt[0][0][0]))
+                    # hullMask[x][0] = cnt[0][0][0]
+                    # hullMask[0][y] = cnt[0][0][1]
+                    # print("HullMask is equal to: " + str(hullMask))
+                    # hullMask[x,y] = [255, 255, 255]
+
+            centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
+            # print(cX)
+            print("The Euclidian distance of: " + str(i) + "is: " + str(centdis))
+
+            if (centdis) < 100:
                 cv2.line(frame, (cX, cY), start, [255,255,255], 1)
+
 
             go = True
     except Exception as e:
         print(sys.exc_info(), sys.exc_info()[2].tb_lineno)
+
+########################################################################################################################
+#                                                                                                                      #
+#                                                                                                                      #
+#                                             Young Trying Weird Shit                                                  #
+#                                                                                                                      #
+#                                                                                                                      #
+########################################################################################################################
+
+
+
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -370,21 +456,22 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
+
+
     # RPS module
-    RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
-    RPS.IS(frame)
+    # RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
+    # RPS.IS(frame)
     # ----------
 
     cv2.imshow("Original Frame", frame)
-    cv2.imshow("HSV", hsv)
-    cv2.imshow("Mask", mask)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
-    cv2.imshow("Edges", edges)
-    #cv2.imshow("HLS", hls)
-    #cv2.imshow("Both?", hls - hsv)
-    # cv2.imshow("FingerMask", mask2)
-    # cv2.imshow("Darker Mask", darkerMask)
+    cv2.imshow("res_thresh", res_thresh)
+    cv2.imshow('final', finalRes)
+    cv2.imshow("ResAdaptThresh", res_adaptThresh)
 
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
         break
+
+
+
