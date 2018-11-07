@@ -19,23 +19,26 @@ while (1):
 		cv2.circle(image, (int(hand.palm_position[0]) + imgSize[0]/2, - int(hand.palm_position[1]) + imgSize[1]), 3, [255, 255, 255], -1)
 		fingers = hand.fingers
 		for finger in fingers:
-			if (finger.type == finger.TYPE_INDEX):
-				fingerType = "Index"
+			if (finger.type == finger.TYPE_THUMB):
+				colour = [0, 0, 255]
+			elif (finger.type == finger.TYPE_INDEX):
+				colour = [0, 255, 255]
 			elif (finger.type == finger.TYPE_MIDDLE):
-				fingerType = "Middle"
+				colour = [255, 255, 0]
 			elif (finger.type == finger.TYPE_RING):
-				fingerType = "Ring"
+				colour = [255, 0, 0]
 			elif (finger.type == finger.TYPE_PINKY):
-				fingerType = "Pinky"
-			elif (finger.type == finger.TYPE_THUMB):
-				fingerType = "Thumb"
-			tip = finger.bone(3)
-			tipCenter = tip.center
-			tipDirection = tip.direction
-			cv2.circle(image, (int(tipCenter[0]) + imgSize[0]/2, - int(tipCenter[1]) + imgSize[1]), 3, [0, 0, 255], -1)
+				colour = [255, 0, 255]
+
+			for i in range(3):
+				bone = finger.bone(i)
+				if bone.is_valid:
+					cv2.circle(image, (int(bone.center[0]) + imgSize[0]/2, - int(bone.center[1]) + imgSize[1]), 3 , colour, -1)
+					cv2.line(image, (int(bone.prev_joint[0]) + imgSize[0]/2, - int(bone.prev_joint[1]) + imgSize[1]), (int(bone.next_joint[0]) + imgSize[0]/2, - int(bone.next_joint[1]) + imgSize[1]), colour, 1)
 			#print(fingerType + " finger:" + "\nCenter: " + str(tipCenter) + "\nDirection: " + str(tipDirection))
 	cv2.imshow("Data", image)
 	cv2.waitKey(1)
+
 '''
   Depricated implementation
 ======= 
