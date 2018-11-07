@@ -153,7 +153,7 @@ while True:
             histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
 
             # For testing and adjusting values
-            print("The maximum value for " + str(col) + " is: ")
+            # print("The maximum value for " + str(col) + " is: ")
             print(histr.max())
 
 
@@ -186,10 +186,10 @@ while True:
             histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
 
             # For testing and adjusting values
-            print("The maximum value for " + str(col) + " is: ")
-            print(histr.max())
-            print("The minimum value for " + str(col) + " is: ")
-            print(histr.min())
+            # print("The maximum value for " + str(col) + " is: ")
+            # print(histr.max())
+            # print("The minimum value for " + str(col) + " is: ")
+            # print(histr.min())
 
             # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
             # histogram, then append that value to the array actualColour.
@@ -199,8 +199,8 @@ while True:
                     actualShadowColour.append(i)
 
             # For testing and adjusting values in the calibration
-            print(actualShadowColour)
-            print("This is the ycbcr thingy: " + str(ycbcr[240, 320]))
+            # print(actualShadowColour)
+            # print("This is the ycbcr thingy: " + str(ycbcr[240, 320]))
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -319,18 +319,18 @@ while True:
     # Specifies that the key input should be 'c'
     if testKey == ord('+'):
         minlen = minlen + 1
-        print("minlen: " + str(minlen))
+        # print("minlen: " + str(minlen))
 
     if testKey == ord('-'):
         minlen = minlen - 1
-        print("minlen: " + str(minlen))
+        # print("minlen: " + str(minlen))
 
     if testKey == ord('/'):
         maxlen = maxlen + 1
-        print("maxlen: " + str(maxlen))
+        # print("maxlen: " + str(maxlen))
     if testKey == ord('*'):
         maxlen = maxlen - 1
-        print("maxlen: " + str(maxlen))
+        # print("maxlen: " + str(maxlen))
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -429,11 +429,11 @@ while True:
 
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
             # print(cX)
-            print("The Euclidian distance of: " + str(i) + "is: " + str(centdis))
-
-            if (centdis) < 100:
+            # print("The Euclidian distance of: " + str(i) + " is: " + str(centdis))
+            # print("The Ratio of the Euclidian distance is: {}".format(centdis/area))
+            if (centdis/area) < 0.0025:
                 cv2.line(frame, (cX, cY), start, [255,255,255], 1)
-
+                cv2.circle(frame, start, 10, [255, 0, 255], -1)
 
             go = True
     except Exception as e:
