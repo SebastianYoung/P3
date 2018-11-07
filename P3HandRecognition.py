@@ -220,8 +220,10 @@ while True:
     lowerCalibratedColour = np.array([actualColour[0] - 10, actualColour[1] - 40, actualColour[2] - 40])
     upperCalibratedColour = np.array([actualColour[0] + 10, actualColour[1] + 40, actualColour[2] + 40])
 
-    lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 10, actualShadowColour[1] - 20, actualShadowColour[2] - 30])
-    upperCalibratedShadowColour = np.array([actualShadowColour[0] + 10, actualShadowColour[1] + 20, actualShadowColour[2] + 30])
+    lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 10, actualShadowColour[1] - 40, actualShadowColour[2] - 40])
+    upperCalibratedShadowColour = np.array([actualShadowColour[0] + 10, actualShadowColour[1] + 40, actualShadowColour[2] + 40])
+
+
 
     ### HSV ###
     # The current colour ranges used for calibration
@@ -241,7 +243,7 @@ while True:
     finalRes = cv2.bitwise_or(mask, mask2, mask=None)
 
     # Converts our res to Gray from BGR
-    gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
+
 
     # Thresholds the image an inverses it so the only thing left are our hand
     thresh, res_thresh = cv2.threshold(res, 0, 255, cv2.THRESH_BINARY_INV)
@@ -249,10 +251,13 @@ while True:
 
     finalres = cv2.bitwise_or(res, res2, mask=None)
 
+    gray = cv2.cvtColor(finalres, cv2.COLOR_BGR2GRAY)
+
     thresh3, finalThresh = cv2.threshold(finalres, 0, 255, cv2.THRESH_BINARY_INV)
 
 
     edges = cv2.Canny(finalres, 50, 200)
+
 
 
 
@@ -269,17 +274,39 @@ while True:
     # This is used to find the contours in the users hand
     res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 2)
 
+
+
     # Creates 2 variables h & w which each corresponds to the shape of the above adaptThresh's x and y axis
     h, w, = res_adaptThresh.shape[:2]
 
     # Creates an array to create an area which should be blurred out
     blurMask = np.zeros((h + 2, w + 2), np.uint8)
 
+    #choose connectivity type, either 4 or 8
+    #connectivity = 4
+    #perform operation
+    #output = cv2.connectedComponentsWithStats(thresh, connectivity, cv2.CV_32S)
+    #Get Result:
+    #first cell is the number of labels
+    #num_labels = output[0]
+    #second cell is the label matrix
+    #labels = output[1]
+    #third cell is the stat matrix
+    #stats = output[2]
+    #fourth cell is the centroid matrix
+    #centroids = output[3]
+
+	#for i in range(len(stats)): 
+	#	stats[i, 4]
+
+	
+
+
     # Various blurring methods
-    res_thresh = cv2.blur(res_thresh, (13, 13))
-    res_thresh = cv2.medianBlur(res_thresh, 19)
-    res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 0)
-    res_thresh = cv2.bitwise_or(res_thresh, res)
+    #res_thresh = cv2.blur(res_thresh, (13, 13))
+    res_thresh = cv2.medianBlur(res_thresh, 9)
+    #res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 0)
+    #res_thresh = cv2.bitwise_or(res_thresh, res)
 
     # Fills out the holes in the blurred image
     cv2.floodFill(res_thresh, blurMask, (0, 0), 255)
@@ -318,6 +345,7 @@ while True:
     # We do not need to explain exactly how this algorithm works.
     _, cnt, _ = cv2.findContours(rat, 2, 1)
 
+ 	
     #
     if (len(cnt) > 0):
         maxArea = -1
@@ -438,20 +466,12 @@ while True:
     # ----------
 
     cv2.imshow("Original Frame", frame)
-    # cv2.imshow("HSV", hsv)
-    # cv2.imshow("res", res)
-    # cv2.imshow("Res2", res2)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
-    # cv2.imshow("Edges", edges)
-    # cv2.imshow("FinalRes", finalRes)
+    cv2.imshow("res_thresh", res_thresh)
+    cv2.imshow('final', finalRes)
+    cv2.imshow("ResAdaptThresh", res_adaptThresh)
+    cv2.imshow("gret", gray)
 
-    # cv2.imshow("HLS", hls)
-    # cv2.imshow("Both?", hls - hsv)
-    # cv2.imshow("FingerMask", mask2)
-    # cv2.imshow("Darker Mask", darkerMask)
-    # cv2.imshow("Grey", gray)
-    # cv2.imshow("finalThresh", finalThresh)
-    # cv2.imshow("HullMask", hullMask)
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
         break
