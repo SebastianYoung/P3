@@ -4,7 +4,7 @@ import sys
 # Import RPS module
 import math
 sys.path.insert(0, 'interactive-software/')
-# import RPS
+import intsoft.RPS as RPS
 
 cap = cv2.VideoCapture(0)
 
@@ -153,7 +153,7 @@ while True:
             histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
 
             # For testing and adjusting values
-            print("The maximum value for " + str(col) + " is: ")
+            # print("The maximum value for " + str(col) + " is: ")
             print(histr.max())
 
 
@@ -186,10 +186,10 @@ while True:
             histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
 
             # For testing and adjusting values
-            print("The maximum value for " + str(col) + " is: ")
-            print(histr.max())
-            print("The minimum value for " + str(col) + " is: ")
-            print(histr.min())
+            # print("The maximum value for " + str(col) + " is: ")
+            # print(histr.max())
+            # print("The minimum value for " + str(col) + " is: ")
+            # print(histr.min())
 
             # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
             # histogram, then append that value to the array actualColour.
@@ -199,8 +199,8 @@ while True:
                     actualShadowColour.append(i)
 
             # For testing and adjusting values in the calibration
-            print(actualShadowColour)
-            print("This is the ycbcr thingy: " + str(ycbcr[240, 320]))
+            # print(actualShadowColour)
+            # print("This is the ycbcr thingy: " + str(ycbcr[240, 320]))
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -217,11 +217,12 @@ while True:
 
     ### HLS ###
     # The current colour ranges used for calibration
-    lowerCalibratedColour = np.array([actualColour[0] - 5, actualColour[1] - 10, actualColour[2] - 15])
-    upperCalibratedColour = np.array([actualColour[0] + 5, actualColour[1] + 10, actualColour[2] + 15])
+    lowerCalibratedColour = np.array([actualColour[0] - 10, actualColour[1] - 40, actualColour[2] - 40])
+    upperCalibratedColour = np.array([actualColour[0] + 10, actualColour[1] + 40, actualColour[2] + 40])
 
-    lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 5, actualShadowColour[1] - 10, actualShadowColour[2] - 15])
-    upperCalibratedShadowColour = np.array([actualShadowColour[0] + 5, actualShadowColour[1] + 10, actualShadowColour[2] + 15])
+    lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 10, actualShadowColour[1] - 40, actualShadowColour[2] - 40])
+    upperCalibratedShadowColour = np.array([actualShadowColour[0] + 10, actualShadowColour[1] + 40, actualShadowColour[2] + 40])
+
 
 
     ### HSV ###
@@ -242,7 +243,6 @@ while True:
     finalRes = cv2.bitwise_or(mask, mask2, mask=None)
 
     # Converts our res to Gray from BGR
-    gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
 
 
     # Thresholds the image an inverses it so the only thing left are our hand
@@ -250,6 +250,8 @@ while True:
     thresh2, res_thresh2 = cv2.threshold(res2, 0, 255, cv2.THRESH_BINARY_INV)
 
     finalres = cv2.bitwise_or(res, res2, mask=None)
+
+    gray = cv2.cvtColor(finalres, cv2.COLOR_BGR2GRAY)
 
     thresh3, finalThresh = cv2.threshold(finalres, 0, 255, cv2.THRESH_BINARY_INV)
 
@@ -317,18 +319,18 @@ while True:
     # Specifies that the key input should be 'c'
     if testKey == ord('+'):
         minlen = minlen + 1
-        print("minlen: " + str(minlen))
+        # print("minlen: " + str(minlen))
 
     if testKey == ord('-'):
         minlen = minlen - 1
-        print("minlen: " + str(minlen))
+        # print("minlen: " + str(minlen))
 
     if testKey == ord('/'):
         maxlen = maxlen + 1
-        print("maxlen: " + str(maxlen))
+        # print("maxlen: " + str(maxlen))
     if testKey == ord('*'):
         maxlen = maxlen - 1
-        print("maxlen: " + str(maxlen))
+        # print("maxlen: " + str(maxlen))
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -427,11 +429,11 @@ while True:
 
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
             # print(cX)
-            print("The Euclidian distance of: " + str(i) + "is: " + str(centdis))
-
-            if (centdis) < 100:
+            # print("The Euclidian distance of: " + str(i) + " is: " + str(centdis))
+            # print("The Ratio of the Euclidian distance is: {}".format(centdis/area))
+            if (centdis/area) < 0.0025:
                 cv2.line(frame, (cX, cY), start, [255,255,255], 1)
-
+                cv2.circle(frame, start, 10, [255, 0, 255], -1)
 
             go = True
     except Exception as e:
@@ -459,8 +461,8 @@ while True:
 
 
     # RPS module
-    # RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
-    # RPS.IS(frame)
+    RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
+    RPS.IS(frame)
     # ----------
 
     cv2.imshow("Original Frame", frame)
@@ -468,6 +470,7 @@ while True:
     cv2.imshow("res_thresh", res_thresh)
     cv2.imshow('final', finalRes)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
+    cv2.imshow("gret", gray)
 
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
