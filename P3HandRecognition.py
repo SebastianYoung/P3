@@ -217,8 +217,8 @@ while True:
 
     ### HLS ###
     # The current colour ranges used for calibration
-    lowerCalibratedColour = np.array([actualColour[0] - 10, actualColour[1] - 20, actualColour[2] - 30])
-    upperCalibratedColour = np.array([actualColour[0] + 10, actualColour[1] + 20, actualColour[2] + 30])
+    lowerCalibratedColour = np.array([actualColour[0] - 10, actualColour[1] - 40, actualColour[2] - 40])
+    upperCalibratedColour = np.array([actualColour[0] + 10, actualColour[1] + 40, actualColour[2] + 40])
 
     lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 10, actualShadowColour[1] - 20, actualShadowColour[2] - 30])
     upperCalibratedShadowColour = np.array([actualShadowColour[0] + 10, actualShadowColour[1] + 20, actualShadowColour[2] + 30])
