@@ -12,7 +12,7 @@ go = False
 start = True
 actualColour = [0, 0, 0]
 actualShadowColour = [0, 0, 0]
-# actualFingerColour = [0, 0, 0]
+
 
 
 minlen = 32
@@ -29,8 +29,6 @@ while True:
 
     # Converts the video capture to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    ycbcr = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
-    # hls = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
 
     if start:
         hullMask = np.zeros_like(frame)
@@ -43,87 +41,9 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
-    ### YCBCR ###
-    # Draws the rectangle we use for calibration in the Original Frame
-#    cv2.rectangle(frame, (270, 190), (370, 290), [0, 0, 255], 1)
-
-#    cv2.rectangle(frame, (270,100), (290, 130), [0, 0, 255], 1)
-
-    # Creates an array with the axis of the HSV capture
-#    calibrateMask = np.zeros(hls.shape[:2], np.uint8)
-
-#    fingerMask = np.zeros(hls.shape[:2], np.uint8)
-
-    # Creates 255 bins for the Array within a 100 x 100 area starting at x =  190, y = 270
-#    calibrateMask[190: 290, 270: 370] = 255
-
-#    fingerMask[100: 130, 270: 290] = 255
-
-
-
-    # Creates an src with the mask over the HSV capture
-#    caliMasked_hls = cv2.bitwise_and(hls, hls, mask=calibrateMask)
-
-#    fingerMasked_hls = cv2.bitwise_and(hls, hls, mask= fingerMask)
-
-    # Waits for input
-#    key = cv2.waitKey(3) & 0xFF
-
-    # Specifies that the key input should be 'c'
-#    if key == ord('c'):
-
-        # Creates a Struct (Structure) for color which are 'b', 'g', 'r'
-#        colour = ('b', 'g', 'r')
-#        fingerColour = ('b', 'g', 'r')
-
-        # Creates an empty array name actualColour which will later be used to store 3 values.
-#        actualColour = []
-#        actualFingerColour = []
-
-        # For loop which enumerates (Allows for loops over something with an automatic counter)
-#        for each, col in enumerate(colour):
-
-            # Creates a variable which holds the histogram of the area in calibrateMask between the values of 0 and 256
-#            histr = cv2.calcHist([caliMasked_hls], [each], calibrateMask, [256], [0, 256])
-
-            # For testing and adjusting values
-#            print("The maximum value for " + str(col) + " is: ")
-#            print(histr.max())
-#            print("The minimum value for " + str(col) + " is: ")
-#            print(histr.min())
-
-            # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
-            # histogram, then append that value to the array actualColour.
-#            for i in range(256):
-#                if histr[i] == histr.max():
-                    # print("This is the highest value for " + str(col) + str(i))
-#                    actualColour.append(i)
-
-            # For testing and adjusting values in the calibration
-#            print(actualColour)
-#            print(hls[240, 320])
-
-#        for each, col in enumerate(fingerColour):
-
-            # Creates a variable which holds the histogram of the area in calibrateMask between the values of 0 and 256
-#            fingerhistr = cv2.calcHist([fingerMasked_hls], [each], fingerMask, [256], [0, 256])
-
-            # For testing and adjusting values
-#            print("The maximum value for " + str(col) + " is: ")
-#            print(fingerhistr.max())
-#            print("The minimum value for " + str(col) + " is: ")
-#            print(fingerhistr.min())
-
-            # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
-            # histogram, then append that value to the array actualColour.
-#            for i in range(256):
-#                if fingerhistr[i] == fingerhistr.max():
-                    # print("This is the highest value for " + str(col) + str(i))
-#                    actualFingerColour.append(i)
-
     ### HSV ###
 
-#    # Draws the rectangle we use for calibration in the Original Frame
+    # Draws the rectangle we use for calibration in the Original Frame
     cv2.rectangle(frame, (270, 190), (370, 290), [0, 0, 255], 1)
 
     # Creates an array with the axis of the HSV capture
@@ -272,8 +192,6 @@ while True:
     # We do not need to explain exactly how this algorithm works.
     _, cnt, _ = cv2.findContours(res_adaptThresh, 2, 1)
 
- 	
-    #
     if (len(cnt) > 0):
         maxArea = -1
         handFound = False
@@ -342,18 +260,6 @@ while True:
             cv2.circle(frame, (cX, cY), 3, [255, 255, 0], -1)
             bounding_rect = cv2.boundingRect(cnt[i])
 
-
-            # rect = frame(bounding_rect).clone()
-            # cv2.imshow("Bounding Box", rect)
-
-            #for x in range(len(hullMask[0])):
-            #    for y in range(len(hullMask[1])):
-            #       print("cnt is equal to: " + str(cnt[0][0][0]))
-            # hullMask[x][0] = cnt[0][0][0]
-            # hullMask[0][y] = cnt[0][0][1]
-            # print("HullMask is equal to: " + str(hullMask))
-            # hullMask[x,y] = [255, 255, 255]
-
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
             # print(cX)
             # print("The Euclidian distance of: " + str(i) + " is: " + str(centdis))
@@ -403,8 +309,6 @@ while True:
     cv2.imshow("Original Frame", frame)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
     cv2.imshow("Frame Copy", copyFrame)
-    cv2.imshow("FinalRes", finalRes)
-
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
         break
