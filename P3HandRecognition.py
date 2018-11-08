@@ -25,6 +25,7 @@ while True:
 
     # Flips the Image for Gab
     frame = cv2.flip(frame, 1)
+    copyFrame = frame.copy()
 
     # Converts the video capture to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -185,12 +186,6 @@ while True:
             # Creates a variable which holds the histogram of the area in calibrateMask between the values of 0 and 256
             histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
 
-            # For testing and adjusting values
-            # print("The maximum value for " + str(col) + " is: ")
-            # print(histr.max())
-            # print("The minimum value for " + str(col) + " is: ")
-            # print(histr.min())
-
             # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
             # histogram, then append that value to the array actualColour.
             for i in range(256):
@@ -253,7 +248,7 @@ while True:
 
     gray = cv2.cvtColor(finalres, cv2.COLOR_BGR2GRAY)
 
-    thresh3, finalThresh = cv2.threshold(finalres, 0, 255, cv2.THRESH_BINARY_INV)
+    thresh3, finalThresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV)
 
 
     edges = cv2.Canny(finalres, 50, 200)
@@ -272,9 +267,7 @@ while True:
 
     # This adaptThreshold creates an outline similar to how Edge Detection would
     # This is used to find the contours in the users hand
-    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 2)
-
-
+    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)
 
     # Creates 2 variables h & w which each corresponds to the shape of the above adaptThresh's x and y axis
     h, w, = res_adaptThresh.shape[:2]
@@ -305,13 +298,14 @@ while True:
     # Various blurring methods
     #res_thresh = cv2.blur(res_thresh, (13, 13))
     res_thresh = cv2.medianBlur(res_thresh, 9)
-    #res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 0)
-    #res_thresh = cv2.bitwise_or(res_thresh, res)
+    # res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 0)
+    res_thresh = cv2.bitwise_or(res_thresh, res)
 
     # Fills out the holes in the blurred image
-    cv2.floodFill(res_thresh, blurMask, (0, 0), 255)
+    cv2.floodFill(res_adaptThresh, blurMask, (0, 0), 255)
 
     rat = cv2.adaptiveThreshold(edges, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 2)
+
 
 
     testKey = cv2.waitKey(3) & 0xFF
@@ -343,7 +337,7 @@ while True:
     # The _ in the beginning indicate that we do not want to store the first output of this function.
     # The function uses an algorithm developed by by Satoshi Suzuki and Keiichi Abe in 1985.
     # We do not need to explain exactly how this algorithm works.
-    _, cnt, _ = cv2.findContours(rat, 2, 1)
+    _, cnt, _ = cv2.findContours(res_adaptThresh, 2, 1)
 
  	
     #
@@ -421,19 +415,26 @@ while True:
 
             #for x in range(len(hullMask[0])):
             #    for y in range(len(hullMask[1])):
-             #       print("cnt is equal to: " + str(cnt[0][0][0]))
-                    # hullMask[x][0] = cnt[0][0][0]
-                    # hullMask[0][y] = cnt[0][0][1]
-                    # print("HullMask is equal to: " + str(hullMask))
-                    # hullMask[x,y] = [255, 255, 255]
+            #       print("cnt is equal to: " + str(cnt[0][0][0]))
+            # hullMask[x][0] = cnt[0][0][0]
+            # hullMask[0][y] = cnt[0][0][1]
+            # print("HullMask is equal to: " + str(hullMask))
+            # hullMask[x,y] = [255, 255, 255]
 
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
             # print(cX)
             # print("The Euclidian distance of: " + str(i) + " is: " + str(centdis))
             # print("The Ratio of the Euclidian distance is: {}".format(centdis/area))
-            if (centdis/area) < 0.0025:
+            # averageX = (cX + start[0])/2
+            # averageY = (cY + start[1])/2
+
+
+            if 0.001 <= (centdis/area) <= 0.0022:
                 cv2.line(frame, (cX, cY), start, [255,255,255], 1)
-                cv2.circle(frame, start, 10, [255, 0, 255], -1)
+                cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
+
+                cv2.putText(copyFrame, str(centdis/area), start, 1, 1, (255, 255, 255), 2)
+                cv2.circle(copyFrame, start, 10, [0, 0, int(centdis) * 2], -1)
 
             go = True
     except Exception as e:
@@ -467,10 +468,7 @@ while True:
 
     cv2.imshow("Original Frame", frame)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
-    cv2.imshow("res_thresh", res_thresh)
-    cv2.imshow('final', finalRes)
-    cv2.imshow("ResAdaptThresh", res_adaptThresh)
-    cv2.imshow("gret", gray)
+    cv2.imshow("Frame Copy", copyFrame)
 
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
