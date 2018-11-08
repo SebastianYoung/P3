@@ -13,8 +13,6 @@ start = True
 actualColour = [0, 0, 0]
 actualShadowColour = [0, 0, 0]
 
-
-
 minlen = 32
 maxlen = 62
 
@@ -73,10 +71,6 @@ while True:
             # Creates a variable which holds the histogram of the area in calibrateMask between the values of 0 and 256
             histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
 
-            # For testing and adjusting values
-            print(histr.max())
-
-
             # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
             # histogram, then append that value to the array actualColour.
             for i in range(256):
@@ -119,10 +113,11 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
-    # The current colour ranges used for calibration
+    # The colour array used for the 'c' calibration
     lowerCalibratedColour = np.array([actualColour[0] - 10, actualColour[1] - 40, actualColour[2] - 40])
     upperCalibratedColour = np.array([actualColour[0] + 10, actualColour[1] + 40, actualColour[2] + 40])
 
+    # The colour array used for the 's' calibration
     lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 10, actualShadowColour[1] - 40, actualShadowColour[2] - 40])
     upperCalibratedShadowColour = np.array([actualShadowColour[0] + 10, actualShadowColour[1] + 40, actualShadowColour[2] + 40])
 
@@ -131,16 +126,8 @@ while True:
     mask = cv2.inRange(hsv, lowerCalibratedColour, upperCalibratedColour)
     mask2 = cv2.inRange(hsv, lowerCalibratedShadowColour, upperCalibratedShadowColour)
 
-    # Bitwise conjunction with the mask
-    res = cv2.bitwise_and(frame, frame, mask = mask)
-    res2 = cv2.bitwise_and(frame, frame, mask = mask2)
-
-    # Does nothing at the moment but the 2nd argument here is where we can put the callibrated shadows
+    # Merges the two masks we have, each mask being a single calibration array of the colour.
     finalRes = cv2.bitwise_or(mask, mask2, mask=None)
-
-    # Thresholds the image an inverses it so the only thing left are our hand
-    thresh, res_thresh = cv2.threshold(res, 0, 255, cv2.THRESH_BINARY_INV)
-    thresh2, res_thresh2 = cv2.threshold(res2, 0, 255, cv2.THRESH_BINARY_INV)
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -257,8 +244,6 @@ while True:
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
             cv2.putText(frame, "Center", (cX - 25, cY - 10), 1, 1, (0, 0, 255), 2)
-            cv2.circle(frame, (cX, cY), 3, [255, 255, 0], -1)
-            bounding_rect = cv2.boundingRect(cnt[i])
 
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
             # print(cX)
@@ -267,13 +252,13 @@ while True:
             # averageX = (cX + start[0])/2
             # averageY = (cY + start[1])/2
 
-
             if 0.001 <= (centdis/area) <= 0.0022:
                 cv2.line(frame, (cX, cY), start, [255,255,255], 1)
                 cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
 
-                cv2.putText(copyFrame, str(centdis/area), start, 1, 1, (255, 255, 255), 2)
+                cv2.putText(copyFrame, str(abs(centdis/area)), start, 1, 1, (255, 255, 255), 2)
                 cv2.circle(copyFrame, start, 10, [0, 0, int(centdis) * 2], -1)
+
 
             go = True
     except Exception as e:
