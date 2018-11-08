@@ -154,7 +154,6 @@ while True:
             histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
 
             # For testing and adjusting values
-            # print("The maximum value for " + str(col) + " is: ")
             print(histr.max())
 
 
@@ -162,7 +161,6 @@ while True:
             # histogram, then append that value to the array actualColour.
             for i in range(256):
                 if histr[i] == histr.max():
-                    # print("This is the highest value for " + str(col) + str(i))
                     actualColour.append(i)
 
             # For testing and adjusting values in the calibration
@@ -190,40 +188,23 @@ while True:
             # histogram, then append that value to the array actualColour.
             for i in range(256):
                 if histr[i] == histr.max():
-                    # print("This is the highest value for " + str(col) + str(i))
                     actualShadowColour.append(i)
 
-            # For testing and adjusting values in the calibration
-            # print(actualShadowColour)
-            # print("This is the ycbcr thingy: " + str(ycbcr[240, 320]))
 
 ########################################################################################################################
 #                                                                                                                      #
 #                                                    Isolating                                                         #
-#                                                                                                                      #
+#                                                   ### HSV ###                                                        #
 #                                                                                                                      #
 #                                                                                                                      #
 ########################################################################################################################
 
-    # Old Colour ranges values for Young's webcam on Yellow. Don't Delete
-    # lowerTargetedColour = np.array([4, 200, 96])
-    # upperTargetColour = np.array([25, 255, 220])
-    # mask = cv2.inRange(hsv, lowerTargetedColour, upperTargetColour)
-
-    ### HLS ###
     # The current colour ranges used for calibration
     lowerCalibratedColour = np.array([actualColour[0] - 10, actualColour[1] - 40, actualColour[2] - 40])
     upperCalibratedColour = np.array([actualColour[0] + 10, actualColour[1] + 40, actualColour[2] + 40])
 
     lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 10, actualShadowColour[1] - 40, actualShadowColour[2] - 40])
     upperCalibratedShadowColour = np.array([actualShadowColour[0] + 10, actualShadowColour[1] + 40, actualShadowColour[2] + 40])
-
-
-
-    ### HSV ###
-    # The current colour ranges used for calibration
-#    lowerCalibratedColour = np.array([actualColour[0]-10, actualColour[1]-100, actualColour[2]-40])
-#    upperCalibratedColour = np.array([actualColour[0]+10, actualColour[1]+100, actualColour[2]+40])
 
     # Creates a mask (an Array) within the range of the lower colour ranges (lowerCalibratedColour) and the upper colour
     # ranges (upperCalibratedColour) for HSV
@@ -237,25 +218,9 @@ while True:
     # Does nothing at the moment but the 2nd argument here is where we can put the callibrated shadows
     finalRes = cv2.bitwise_or(mask, mask2, mask=None)
 
-    # Converts our res to Gray from BGR
-
-
     # Thresholds the image an inverses it so the only thing left are our hand
     thresh, res_thresh = cv2.threshold(res, 0, 255, cv2.THRESH_BINARY_INV)
     thresh2, res_thresh2 = cv2.threshold(res2, 0, 255, cv2.THRESH_BINARY_INV)
-
-    finalres = cv2.bitwise_or(res, res2, mask=None)
-
-    gray = cv2.cvtColor(finalres, cv2.COLOR_BGR2GRAY)
-
-    thresh3, finalThresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV)
-
-
-    edges = cv2.Canny(finalres, 50, 200)
-
-
-
-
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -269,44 +234,12 @@ while True:
     # This is used to find the contours in the users hand
     res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)
 
-    # Creates 2 variables h & w which each corresponds to the shape of the above adaptThresh's x and y axis
-    h, w, = res_adaptThresh.shape[:2]
-
-    # Creates an array to create an area which should be blurred out
-    blurMask = np.zeros((h + 2, w + 2), np.uint8)
-
-    #choose connectivity type, either 4 or 8
-    #connectivity = 4
-    #perform operation
-    #output = cv2.connectedComponentsWithStats(thresh, connectivity, cv2.CV_32S)
-    #Get Result:
-    #first cell is the number of labels
-    #num_labels = output[0]
-    #second cell is the label matrix
-    #labels = output[1]
-    #third cell is the stat matrix
-    #stats = output[2]
-    #fourth cell is the centroid matrix
-    #centroids = output[3]
-
-	#for i in range(len(stats)): 
-	#	stats[i, 4]
-
-	
-
-
-    # Various blurring methods
-    #res_thresh = cv2.blur(res_thresh, (13, 13))
-    res_thresh = cv2.medianBlur(res_thresh, 9)
-    # res_thresh = cv2.GaussianBlur(res_thresh, (5, 5), 0)
-    res_thresh = cv2.bitwise_or(res_thresh, res)
-
-    # Fills out the holes in the blurred image
-    cv2.floodFill(res_adaptThresh, blurMask, (0, 0), 255)
-
-    rat = cv2.adaptiveThreshold(edges, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 2)
-
-
+########################################################################################################################
+#                                                                                                                      #
+#                            For changing the the size of the boundary box to be detected                              #
+#                                                                                                                      #
+#                                                                                                                      #
+########################################################################################################################
 
     testKey = cv2.waitKey(3) & 0xFF
 
@@ -449,7 +382,16 @@ while True:
 ########################################################################################################################
 
 
+########################################################################################################################
+#                                                                                                                      #
+#                                                   # RPS module                                                       #
+#                                                                                                                      #
+#                                                                                                                      #
+#                                                                                                                      #
+########################################################################################################################
 
+    RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
+    RPS.IS(frame)
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -458,17 +400,10 @@ while True:
 #                                                                                                                      #
 #                                                                                                                      #
 ########################################################################################################################
-
-
-
-    # RPS module
-    RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
-    RPS.IS(frame)
-    # ----------
-
     cv2.imshow("Original Frame", frame)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
     cv2.imshow("Frame Copy", copyFrame)
+    cv2.imshow("FinalRes", finalRes)
 
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
