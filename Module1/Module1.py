@@ -30,10 +30,10 @@ while (1):
 			elif (finger.type == finger.TYPE_PINKY):
 				colour = [255, 0, 255]
 
-			for i in range(3):
+			for i in range(1, 4):
 				bone = finger.bone(i)
 				if bone.is_valid:
-					cv2.circle(image, (int(bone.center[0]) + imgSize[0]/2, - int(bone.center[1]) + imgSize[1]), 3 , colour, -1)
+					cv2.circle(image, (int(bone.center[0]) + imgSize[0]/2, - int(bone.center[1]) + imgSize[1]), 2 , colour, -1)
 					cv2.line(image, (int(bone.prev_joint[0]) + imgSize[0]/2, - int(bone.prev_joint[1]) + imgSize[1]), (int(bone.next_joint[0]) + imgSize[0]/2, - int(bone.next_joint[1]) + imgSize[1]), colour, 1)
 			#print(fingerType + " finger:" + "\nCenter: " + str(tipCenter) + "\nDirection: " + str(tipDirection))
 	cv2.imshow("Data", image)
