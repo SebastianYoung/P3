@@ -258,6 +258,8 @@ while True:
 
             # cv2.circle(res_adaptThresh, (cX, cY),feretXY, [255, 255, 255], -1)
 
+            print(area)
+
             if 0.001 <= (centdis/area) <= 0.0022:
                 cv2.line(frame, (cX, cY), start, [255,255,255], 1)
                 cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
