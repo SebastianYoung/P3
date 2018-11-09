@@ -3,39 +3,45 @@ import time
 import cv2
 import numpy
 
+
 imgSize = [500, 500]
 
 controller = Leap.Controller()
+
+def leapMotion():
+	frame = controller.frame()
+	hands = frame.hands
+	handsAmount = numpy.size(hands)
+	leftHand, rightHand = ["None"], ["None"]
+	for hand in hands:
+		fingers = hand.fingers
+		fingerInfo = []
+		for i in range(len(fingers)):
+			fingerInfo.extend([fingers[i].type, fingers[i].bone(1).center.to_tuple(), fingers[i].bone(2).center.to_tuple(), fingers[i].bone(3).center.to_tuple()])
+		if (hand.is_left):
+			leftHand.extend(fingerInfo)
+			leftHand[0] = "Left"
+		else:
+			rightHand.extend(fingerInfo)
+			rightHand[0] = "Right"
+	hands = [leftHand, rightHand]
+	return handsAmount, hands
+
 
 time.sleep(1)
 while (1):
 	image = numpy.zeros((imgSize[0], imgSize[1]), numpy.uint8)
 	image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-	frame = controller.frame()
-	hands = frame.hands
+	_, hands = leapMotion()
 	for hand in hands:
-		#print(str(hand) + "\nPalm position: " + str(hand.palm_position))
-		#image[hand.palm_position[0] + 250][hand.palm_position[1] + 250] = 255
-		cv2.circle(image, (int(hand.palm_position[0]) + imgSize[0]/2, - int(hand.palm_position[1]) + imgSize[1]), 3, [255, 255, 255], -1)
-		fingers = hand.fingers
-		for finger in fingers:
-			if (finger.type == finger.TYPE_THUMB):
+		if (hand[0] != "None"):
+			if (hand[0] == "Right"):
 				colour = [0, 0, 255]
-			elif (finger.type == finger.TYPE_INDEX):
-				colour = [0, 255, 255]
-			elif (finger.type == finger.TYPE_MIDDLE):
-				colour = [255, 255, 0]
-			elif (finger.type == finger.TYPE_RING):
+			else:
 				colour = [255, 0, 0]
-			elif (finger.type == finger.TYPE_PINKY):
-				colour = [255, 0, 255]
-
-			for i in range(1, 4):
-				bone = finger.bone(i)
-				if bone.is_valid:
-					cv2.circle(image, (int(bone.center[0]) + imgSize[0]/2, - int(bone.center[1]) + imgSize[1]), 2 , colour, -1)
-					cv2.line(image, (int(bone.prev_joint[0]) + imgSize[0]/2, - int(bone.prev_joint[1]) + imgSize[1]), (int(bone.next_joint[0]) + imgSize[0]/2, - int(bone.next_joint[1]) + imgSize[1]), colour, 1)
-			#print(fingerType + " finger:" + "\nCenter: " + str(tipCenter) + "\nDirection: " + str(tipDirection))
+			for i in range(2, 18, 4):
+				for j in range(3):
+					cv2.circle(image, (int(hand[i+j][0]) + imgSize[0]/2, - int(hand[i+j][1]) + imgSize[1]), 2 , colour, -1)
 	cv2.imshow("Data", image)
 	cv2.waitKey(1)
 
