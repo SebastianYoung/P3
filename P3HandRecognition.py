@@ -5,6 +5,7 @@ import sys
 import math
 sys.path.insert(0, 'interactive-software/')
 import intsoft.RPS as RPS
+import Module4.mod4 as M4
 
 cap = cv2.VideoCapture(0)
 
@@ -299,6 +300,9 @@ while True:
 
     RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
     RPS.IS(frame)
+    
+    # Module 4 hook
+    M4.Module4(frame, RPS.RPS.ROCK, RPS.RPS.ROCK)
 
 ########################################################################################################################
 #                                                                                                                      #
