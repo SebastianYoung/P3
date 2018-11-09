@@ -177,7 +177,7 @@ while True:
     # The _ in the beginning indicate that we do not want to store the first output of this function.
     # The function uses an algorithm developed by by Satoshi Suzuki and Keiichi Abe in 1985.
     # We do not need to explain exactly how this algorithm works.
-    _, cnt, _ = cv2.findContours(res_adaptThresh, 2, 1)
+    _, cnt, _ = cv2.findContours(res_adaptThresh, 2,3)
 
     if (len(cnt) > 0):
         maxArea = -1
@@ -186,7 +186,6 @@ while True:
             temp = cnt[i]
             area = cv2.contourArea(temp)
             tmh = cv2.convexHull(temp, returnPoints=False)
-            tmv = cv2.convexityDefects(temp, tmh)
 
             if area > maxArea and not handFound:
                 try:
@@ -251,6 +250,13 @@ while True:
             # print("The Ratio of the Euclidian distance is: {}".format(centdis/area))
             # averageX = (cX + start[0])/2
             # averageY = (cY + start[1])/2
+            # feretX = hull[0] / math.pi
+            # feretY = hull[1] / math.pi
+            # feretXY = feretX + feretY
+
+            # print(round(feretXY, 2))
+
+            # cv2.circle(res_adaptThresh, (cX, cY),feretXY, [255, 255, 255], -1)
 
             if 0.001 <= (centdis/area) <= 0.0022:
                 cv2.line(frame, (cX, cY), start, [255,255,255], 1)
