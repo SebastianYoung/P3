@@ -26,7 +26,7 @@ while True:
     # Flips the Image for Gab
     frame = cv2.flip(frame, 1)
 
-    # Converts the video capture to HSV
+    # Converts the video capture to HSVg
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     ycbcr = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
     # hls = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
@@ -254,6 +254,21 @@ while True:
     thresh3, finalThresh = cv2.threshold(finalres, 0, 255, cv2.THRESH_BINARY_INV)
 
 
+ # Thresholds the image an inverses it so the only thing left are our hand
+    thresh, res_thresh = cv2.threshold(res, 0, 255, cv2.THRESH_BINARY_INV)
+
+    thresh, finalRes = cv2.threshold(finalRes,0,255,cv2.THRESH_BINARY_INV)
+
+    openKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(4,4))
+    closeKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
+    
+    #finalRes = cv2.erode(finalRes, openKernel)
+
+    #finalRes = cv2.dilate(finalRes, closeKernel)
+
+    finalRes = cv2.morphologyEx(finalRes, cv2.MORPH_CLOSE, openKernel)
+
+
     edges = cv2.Canny(finalres, 50, 200)
 
 
@@ -464,7 +479,7 @@ while True:
     # ----------
 
     cv2.imshow("Original Frame", frame)
-<<<<<<< HEAD
+    #cv2.imshow('closing', closing)
     #cv2.imshow("HSV", hsv)
     #cv2.imshow("Mask", mask)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
@@ -473,7 +488,7 @@ while True:
     cv2.imshow('final', finalRes)
     #cv2.imshow("HLS", hls)
     #cv2.imshow("Both?", hls - hsv)
-=======
+
     # cv2.imshow("HSV", hsv)
     # cv2.imshow("res", res)
     # cv2.imshow("Res2", res2)
@@ -483,7 +498,7 @@ while True:
 
     # cv2.imshow("HLS", hls)
     # cv2.imshow("Both?", hls - hsv)
->>>>>>> cd152c14e3a0ed1b75c0aa83e924dd1d0e9960a8
+
     # cv2.imshow("FingerMask", mask2)
     # cv2.imshow("Darker Mask", darkerMask)
     # cv2.imshow("Grey", gray)
