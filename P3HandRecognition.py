@@ -268,7 +268,8 @@ while True:
 
             go = True
     except Exception as e:
-        print(sys.exc_info(), sys.exc_info()[2].tb_lineno)
+        pass
+        #print(sys.exc_info(), sys.exc_info()[2].tb_lineno)
 
 ########################################################################################################################
 #                                                                                                                      #
