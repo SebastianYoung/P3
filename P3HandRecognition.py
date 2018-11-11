@@ -300,7 +300,7 @@ while True:
 
     RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
     RPS.IS(frame)
-    
+
     # Module 4 hook
     M4.Module4(frame, RPS.RPS.ROCK, RPS.RPS.ROCK)
 
