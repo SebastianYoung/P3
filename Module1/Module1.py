@@ -1,43 +1,42 @@
 import Leap
-import time
 import cv2
 import numpy
+
 
 imgSize = [500, 500]
 
 controller = Leap.Controller()
 
-time.sleep(1)
+def leapMotion():
+	frame = controller.frame()
+	hands = frame.hands
+	if hands[0].is_valid:
+		fingers = hands[0].fingers
+		fingerTips = numpy.zeros(12)
+		for finger in fingers:
+			fingerTips[finger.type*2] = finger.bone(3).center[0]
+			fingerTips[finger.type*2 + 1] = finger.bone(3).center[1]
+		fingerTips[10] = hands[0].palm_position[0]
+		fingerTips[11] = hands[0].palm_position[1]
+		return fingerTips
+	return numpy.array(None)
+
+
+
 while (1):
 	image = numpy.zeros((imgSize[0], imgSize[1]), numpy.uint8)
 	image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-	frame = controller.frame()
-	hands = frame.hands
-	for hand in hands:
-		#print(str(hand) + "\nPalm position: " + str(hand.palm_position))
-		#image[hand.palm_position[0] + 250][hand.palm_position[1] + 250] = 255
-		cv2.circle(image, (int(hand.palm_position[0]) + imgSize[0]/2, - int(hand.palm_position[1]) + imgSize[1]), 3, [255, 255, 255], -1)
-		fingers = hand.fingers
-		for finger in fingers:
-			if (finger.type == finger.TYPE_THUMB):
-				colour = [0, 0, 255]
-			elif (finger.type == finger.TYPE_INDEX):
-				colour = [0, 255, 255]
-			elif (finger.type == finger.TYPE_MIDDLE):
-				colour = [255, 255, 0]
-			elif (finger.type == finger.TYPE_RING):
-				colour = [255, 0, 0]
-			elif (finger.type == finger.TYPE_PINKY):
-				colour = [255, 0, 255]
-
-			for i in range(3):
-				bone = finger.bone(i)
-				if bone.is_valid:
-					cv2.circle(image, (int(bone.center[0]) + imgSize[0]/2, - int(bone.center[1]) + imgSize[1]), 3 , colour, -1)
-					cv2.line(image, (int(bone.prev_joint[0]) + imgSize[0]/2, - int(bone.prev_joint[1]) + imgSize[1]), (int(bone.next_joint[0]) + imgSize[0]/2, - int(bone.next_joint[1]) + imgSize[1]), colour, 1)
-			#print(fingerType + " finger:" + "\nCenter: " + str(tipCenter) + "\nDirection: " + str(tipDirection))
+	fingerTips = leapMotion()
+	
+	if fingerTips.any() != None:
+		for i in range(0,numpy.size(fingerTips), 2):
+			colour = [(255*i)/numpy.size(fingerTips),255,(255*i)/numpy.size(fingerTips)]
+			cv2.circle(image, (int(fingerTips[i]) + imgSize[0]/2, - int(fingerTips[i+1]) + imgSize[1]), 3, colour, -1)
 	cv2.imshow("Data", image)
-	cv2.waitKey(1)
+	
+	k = cv2.waitKey(1)
+	if k == 27:
+		break
 
 '''
   Depricated implementation
