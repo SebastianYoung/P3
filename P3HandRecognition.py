@@ -12,7 +12,8 @@ go = False
 start = True
 actualColour = [0, 0, 0]
 actualShadowColour = [0, 0, 0]
-
+smallerNumber = 0.001
+smallNumber = 0.0022
 minlen = 32
 maxlen = 62
 
@@ -25,7 +26,7 @@ while True:
     frame = cv2.flip(frame, 1)
     copyFrame = frame.copy()
 
-    # Converts the video capture to HSV
+    # Converts the video capture to HSVg
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     if start:
@@ -54,7 +55,7 @@ while True:
     caliMasked_hsv = cv2.bitwise_and(hsv, hsv, mask = calibrateMask)
 
     # Waits for input
-    key = cv2.waitKey(3) & 0xFF
+    key = cv2.waitKey(1) & 0xFF
 
     # Specifies that the key input should be 'c'
     if key == ord('c'):
@@ -81,7 +82,7 @@ while True:
             print(actualColour)
             print(hsv[240, 320])
 
-    key = cv2.waitKey(5) & 0xFF
+    key = cv2.waitKey(1) & 0xFF
 
     # Specifies that the key input should be 'c'
     if key == ord('s'):
@@ -129,6 +130,18 @@ while True:
     # Merges the two masks we have, each mask being a single calibration array of the colour.
     finalRes = cv2.bitwise_or(mask, mask2, mask=None)
 
+    openKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(8,8))
+    closeKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
+    
+ #   finalRes = cv2.erode(finalRes, openKernel)
+
+#    finalRes = cv2.dilate(finalRes, closeKernel)
+
+    # finalRes = cv2.morphologyEx(finalRes, cv2.MORPH_CLOSE, openKernel)
+
+    fingerRes = cv2.bitwise_or(mask, mask, mask = None)
+
+
 ########################################################################################################################
 #                                                                                                                      #
 #                                                   Blurring                                                           #
@@ -139,7 +152,7 @@ while True:
 
     # This adaptThreshold creates an outline similar to how Edge Detection would
     # This is used to find the contours in the users hand
-    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)
+    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 27, 2)
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -148,23 +161,23 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
-    testKey = cv2.waitKey(3) & 0xFF
+    testKey = cv2.waitKey(1) & 0xFF
 
     # Specifies that the key input should be 'c'
     if testKey == ord('+'):
-        minlen = minlen + 1
-        # print("minlen: " + str(minlen))
+        smallerNumber = smallerNumber + 0.001
+        print("smallerNumber: " + str(smallerNumber))
 
     if testKey == ord('-'):
-        minlen = minlen - 1
-        # print("minlen: " + str(minlen))
+        smallerNumber = smallerNumber - 0.001
+        print("smallerNumber: " + str(smallerNumber))
 
     if testKey == ord('/'):
-        maxlen = maxlen + 1
-        # print("maxlen: " + str(maxlen))
+        smallNumber = smallNumber + 0.001
+        print("smallNumber: " + str(smallNumber))
     if testKey == ord('*'):
-        maxlen = maxlen - 1
-        # print("maxlen: " + str(maxlen))
+        smallNumber = smallNumber - 0.001
+        print("smallNumber: " + str(smallNumber))
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -245,6 +258,7 @@ while True:
             cv2.putText(frame, "Center", (cX - 25, cY - 10), 1, 1, (0, 0, 255), 2)
 
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
+
             # print(cX)
             # print("The Euclidian distance of: " + str(i) + " is: " + str(centdis))
             # print("The Ratio of the Euclidian distance is: {}".format(centdis/area))
@@ -256,16 +270,31 @@ while True:
 
             # print(round(feretXY, 2))
 
-            # cv2.circle(res_adaptThresh, (cX, cY),feretXY, [255, 255, 255], -1)
+            # cv2.line(copyFrame, (cX, cY), feretXY, [255, 255, 255], -1)
 
-            print(area)
+            for c in cnt:
+                peri = (cv2.arcLength(c, True))
+                approx = cv2.approxPolyDP(c, 0.01 * peri, True)
+                x, y, w, h = cv2.boundingRect(approx)
+                cv2.rectangle(copyFrame, (x, y), (w+x, h+y), (0, 255, 0), 1)
 
-            if 0.001 <= (centdis/area) <= 0.0022:
-                cv2.line(frame, (cX, cY), start, [255,255,255], 1)
-                cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
 
-                cv2.putText(copyFrame, str(abs(centdis/area)), start, 1, 1, (255, 255, 255), 2)
-                cv2.circle(copyFrame, start, 10, [0, 0, int(centdis) * 2], -1)
+            #print(tmh)
+            # if smallerNumber<= (centdis/area) <= smallNumber:
+              #   cv2.line(frame, (cX, cY), start, [255,255,255], 1)
+                # cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
+
+                # cv2.circle(copyFrame, start, 10, [0, 0, int(centdis) * 2], -1)
+
+            # print("End[0][1] is equal to:" + str(end[0]))
+            # print("cY is equal to: " + str(cY))
+            if end[1] < cY:
+                # cv2.circle(copyFrame, end, 10, [0, 255, 0], -1)
+                if smallerNumber <= (centdis / area) <= smallNumber:
+                    cv2.line(frame, (cX, cY), start, [255, 255, 255], 1)
+                    cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
+                    for k in range(5):
+                        cv2.putText(copyFrame, str(tmp_e), start, 1, 1, (255, 255, 255), 2)
 
 
             go = True
@@ -301,8 +330,10 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
     cv2.imshow("Original Frame", frame)
+
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
     cv2.imshow("Frame Copy", copyFrame)
+
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
         break
