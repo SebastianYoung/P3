@@ -1,5 +1,4 @@
 import Leap
-import time
 import cv2
 import numpy
 
@@ -11,39 +10,33 @@ controller = Leap.Controller()
 def leapMotion():
 	frame = controller.frame()
 	hands = frame.hands
-	handsAmount = numpy.size(hands)
-	leftHand, rightHand = ["None"], ["None"]
-	for hand in hands:
-		fingers = hand.fingers
-		fingerInfo = []
-		for i in range(len(fingers)):
-			fingerInfo.extend([fingers[i].type, fingers[i].bone(1).center.to_tuple(), fingers[i].bone(2).center.to_tuple(), fingers[i].bone(3).center.to_tuple()])
-		if (hand.is_left):
-			leftHand.extend(fingerInfo)
-			leftHand[0] = "Left"
-		else:
-			rightHand.extend(fingerInfo)
-			rightHand[0] = "Right"
-	hands = [leftHand, rightHand]
-	return handsAmount, hands
+	if hands[0].is_valid:
+		fingers = hands[0].fingers
+		fingerTips = numpy.zeros(12)
+		for finger in fingers:
+			fingerTips[finger.type*2] = finger.bone(3).center[0]
+			fingerTips[finger.type*2 + 1] = finger.bone(3).center[1]
+		fingerTips[10] = hands[0].palm_position[0]
+		fingerTips[11] = hands[0].palm_position[1]
+		return fingerTips
+	return numpy.array(None)
 
 
-time.sleep(1)
+
 while (1):
 	image = numpy.zeros((imgSize[0], imgSize[1]), numpy.uint8)
 	image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-	_, hands = leapMotion()
-	for hand in hands:
-		if (hand[0] != "None"):
-			if (hand[0] == "Right"):
-				colour = [0, 0, 255]
-			else:
-				colour = [255, 0, 0]
-			for i in range(2, 18, 4):
-				for j in range(3):
-					cv2.circle(image, (int(hand[i+j][0]) + imgSize[0]/2, - int(hand[i+j][1]) + imgSize[1]), 2 , colour, -1)
+	fingerTips = leapMotion()
+	
+	if fingerTips.any() != None:
+		for i in range(0,numpy.size(fingerTips), 2):
+			colour = [(255*i)/numpy.size(fingerTips),255,(255*i)/numpy.size(fingerTips)]
+			cv2.circle(image, (int(fingerTips[i]) + imgSize[0]/2, - int(fingerTips[i+1]) + imgSize[1]), 3, colour, -1)
 	cv2.imshow("Data", image)
-	cv2.waitKey(1)
+	
+	k = cv2.waitKey(1)
+	if k == 27:
+		break
 
 '''
   Depricated implementation
