@@ -1,10 +1,9 @@
 import cv2
 import numpy as np
 import sys
-# Import RPS module
 import math
-sys.path.insert(0, 'interactive-software/')
 import intsoft.RPS as RPS
+import Module4.mod4 as M4
 
 cap = cv2.VideoCapture(0)
 
@@ -12,8 +11,6 @@ go = False
 start = True
 actualColour = [0, 0, 0]
 actualShadowColour = [0, 0, 0]
-smallerNumber = 0.001
-smallNumber = 0.0022
 minlen = 32
 maxlen = 62
 
@@ -152,7 +149,7 @@ while True:
 
     # This adaptThreshold creates an outline similar to how Edge Detection would
     # This is used to find the contours in the users hand
-    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 27, 2)
+    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 29, 2)
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -161,23 +158,6 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
-    testKey = cv2.waitKey(1) & 0xFF
-
-    # Specifies that the key input should be 'c'
-    if testKey == ord('+'):
-        smallerNumber = smallerNumber + 0.001
-        print("smallerNumber: " + str(smallerNumber))
-
-    if testKey == ord('-'):
-        smallerNumber = smallerNumber - 0.001
-        print("smallerNumber: " + str(smallerNumber))
-
-    if testKey == ord('/'):
-        smallNumber = smallNumber + 0.001
-        print("smallNumber: " + str(smallNumber))
-    if testKey == ord('*'):
-        smallNumber = smallNumber - 0.001
-        print("smallNumber: " + str(smallNumber))
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -235,6 +215,8 @@ while True:
                 diff_e2 = np.linalg.norm((tmp_e[1] - end[1]))
                 glob = diff_s1 + diff_s2 + diff_e1 + diff_e2
                 dist = 3
+                glob_S = diff_s1 + diff_s2
+                print("Glob_S is equal to " + str(glob_S))
                 if glob <= dist:
                     continue
             tmp_s = start
@@ -249,9 +231,13 @@ while True:
 
             cv2.line(frame, start, far, [0, 0, 255], 1)
             cv2.line(frame, end, far, [0, 0, 255], 1)
+
             cv2.circle(frame, far, 3, [0, 200, 0], -1)
 
-            cv2.putText(frame, str(i), end, 1, 1, (0, 0, 255), 2)
+
+
+
+            # cv2.putText(frame, str(i), end, 1, 1, (0, 0, 255), 2)
             M = cv2.moments(cnt)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
@@ -259,42 +245,19 @@ while True:
 
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
 
-            # print(cX)
-            # print("The Euclidian distance of: " + str(i) + " is: " + str(centdis))
-            # print("The Ratio of the Euclidian distance is: {}".format(centdis/area))
-            # averageX = (cX + start[0])/2
-            # averageY = (cY + start[1])/2
-            # feretX = hull[0] / math.pi
-            # feretY = hull[1] / math.pi
-            # feretXY = feretX + feretY
-
-            # print(round(feretXY, 2))
-
-            # cv2.line(copyFrame, (cX, cY), feretXY, [255, 255, 255], -1)
-
             for c in cnt:
                 peri = (cv2.arcLength(c, True))
                 approx = cv2.approxPolyDP(c, 0.01 * peri, True)
                 x, y, w, h = cv2.boundingRect(approx)
                 cv2.rectangle(copyFrame, (x, y), (w+x, h+y), (0, 255, 0), 1)
 
-
-            #print(tmh)
-            # if smallerNumber<= (centdis/area) <= smallNumber:
-              #   cv2.line(frame, (cX, cY), start, [255,255,255], 1)
-                # cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
-
-                # cv2.circle(copyFrame, start, 10, [0, 0, int(centdis) * 2], -1)
-
-            # print("End[0][1] is equal to:" + str(end[0]))
-            # print("cY is equal to: " + str(cY))
-            if end[1] < cY:
-                # cv2.circle(copyFrame, end, 10, [0, 255, 0], -1)
-                if smallerNumber <= (centdis / area) <= smallNumber:
+            if start[1] <= cY + 10 and glob_S > 70:
+                for k in range(5):
                     cv2.line(frame, (cX, cY), start, [255, 255, 255], 1)
                     cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
-                    for k in range(5):
-                        cv2.putText(copyFrame, str(tmp_e), start, 1, 1, (255, 255, 255), 2)
+                    cv2.putText(copyFrame, str(i) + str(tmp_e), start, 1, 1, (255, 255, 255), 2)
+
+
 
 
             go = True
@@ -322,6 +285,9 @@ while True:
     RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
     RPS.IS(frame)
 
+    # Module 4 hook
+    M4.Module4(frame, RPS.RPS.ROCK, RPS.RPS.ROCK, cap.get(cv2.CAP_PROP_FPS))
+
 ########################################################################################################################
 #                                                                                                                      #
 #                                                 Showing Windows                                                      #
@@ -334,7 +300,7 @@ while True:
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
     cv2.imshow("Frame Copy", copyFrame)
 
-    k = cv2.waitKey(5) & 0xFF
+    k = cv2.waitKey(1) & 0xFF
     if k == 27:
         break
 
