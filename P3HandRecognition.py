@@ -300,7 +300,7 @@ while True:
     RPS.IS(frame)
 
     # Module 4 hook
-    M4.Module4(frame, RPS.RPS.ROCK, RPS.RPS.ROCK)
+    M4.Module4(frame, RPS.RPS.ROCK, RPS.RPS.ROCK, cap.get(cv2.CAP_PROP_FPS))
 
 ########################################################################################################################
 #                                                                                                                      #

@@ -1,27 +1,27 @@
 import cv2, time, numpy as np
 
-init = False
+init_4 = False
 run_start = 0
 run_end = 0
 det_time = 0
 total_time = 0
 eff = "0"
 
-def Module4(img, posture, guess):
-    global run_start, run_end, init, det_time, total_time, eff
+def Module4(img, posture, guess, cam_fb):
+    global run_start, run_end, init_4, det_time, total_time, eff
 
     key = cv2.waitKey(1)
-    if key == 107 and not init:
-        init = True
+    if key == 107 and not init_4:
+        init_4 = True
         run_start = time.time()
         print("\n########################\n### Module 4 - DEBUG ###\n########################\n|")
         print("| Started: {}".format(run_start))
-    if key == 108 and init:
-        init = False
+    if key == 108 and init_4:
+        init_4 = False
         run_end = time.time()
         print("| Ended: {0}\n| Runtime: {1:.2f}s\n|".format(run_end, run_end - run_start))
 
-    if (init):
+    if (init_4):
         total_time += 1
         if (posture==guess):
             det_time += 1
@@ -34,15 +34,17 @@ def Module4(img, posture, guess):
                 eff = np.divide(total_time, t_fps)
                 eff = "| Efficiency: {0:.2f}s".format(eff)
 
-    if not init and total_time > 0:
+    if not init_4 and total_time > 0:
         _fps = np.divide(total_time, run_end - run_start)
         print("| REAL FPS: {0:.2f}".format(_fps))
         if (total_time - det_time) == 0:
             print("| Accuracy: {}%".format(100))
         else:
             print("| Accuracy: {}%".format(total_time - det_time, np.divide(det_time, total_time)*100))
-
-        print(eff)
+        l_frames = cam_fb - _fps
+        if (l_frames <= 0):
+            l_frames = 0
+        print("{}, lost frames: {:.2f}".format(eff, l_frames))
         print("| |{}| |{}|".format(total_time, det_time))
         print("########################\n")
         det_time = 0
