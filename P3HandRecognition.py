@@ -1,9 +1,7 @@
 import cv2
 import numpy as np
 import sys
-# Import RPS module
 import math
-sys.path.insert(0, 'interactive-software/')
 import intsoft.RPS as RPS
 import Module4.mod4 as M4
 
@@ -57,7 +55,7 @@ while True:
     caliMasked_hsv = cv2.bitwise_and(hsv, hsv, mask = calibrateMask)
 
     # Waits for input
-    key = cv2.waitKey(3) & 0xFF
+    key = cv2.waitKey(1) & 0xFF
 
     # Specifies that the key input should be 'c'
     if key == ord('c'):
@@ -88,7 +86,7 @@ while True:
             print(actualColour)
             print(hsv[240, 320])
 
-    key = cv2.waitKey(5) & 0xFF
+    key = cv2.waitKey(1) & 0xFF
 
     # Specifies that the key input should be 'c'
     if key == ord('s'):
@@ -162,7 +160,7 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
-    testKey = cv2.waitKey(3) & 0xFF
+    testKey = cv2.waitKey(1) & 0xFF
 
     # Specifies that the key input should be 'c'
     if testKey == ord('+'):
@@ -314,7 +312,7 @@ while True:
     cv2.imshow("Original Frame", frame)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
     cv2.imshow("Frame Copy", copyFrame)
-    k = cv2.waitKey(5) & 0xFF
+    k = cv2.waitKey(1) & 0xFF
     if k == 27:
         break
 

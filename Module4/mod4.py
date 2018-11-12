@@ -37,8 +37,13 @@ def Module4(img, posture, guess):
     if not init and total_time > 0:
         _fps = np.divide(total_time, run_end - run_start)
         print("| REAL FPS: {0:.2f}".format(_fps))
-        print("| Accuracy: {}%".format(total_time - det_time, np.divide(det_time, total_time)*100))
+        if (total_time - det_time) == 0:
+            print("| Accuracy: {}%".format(100))
+        else:
+            print("| Accuracy: {}%".format(total_time - det_time, np.divide(det_time, total_time)*100))
+
         print(eff)
+        print("| |{}| |{}|".format(total_time, det_time))
         print("########################\n")
         det_time = 0
         total_time = 0
