@@ -14,7 +14,7 @@ def angle(uv1, uv2):
 def Module3(cords):
     # Required array of finger-coords
     # [ x_thumb, y_thumb,
-    #   x_index, y_index, 
+    #   x_index, y_index,
     #   x_middle, y_middle,
     #   x_ring, y_ring
     #   x_pinky, y_pinky
@@ -39,7 +39,9 @@ def Module3(cords):
     imAngle = np.degrees(angle(indexUnit, middleUnit))
     mrAngle = np.degrees(angle(middleUnit, ringUnit))
 
-    print(tiAngle, imAngle, mrAngle)
+    print("TI:{:.2f}, IM:{:.2f}, MR:{:.2f}".format(tiAngle, imAngle, mrAngle))
+    if (tiAngle >= 20 && mrAngle >= 14 && imAngle <= 20): # SCISSOR
+        return 2 # RPS.SCISSORS = 2
     '''
     indexMag = np.linalg.norm(index)
     middleMag = np.linalg.norm(middle)

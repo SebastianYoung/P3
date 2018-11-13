@@ -4,11 +4,13 @@ init_4 = False
 run_start = 0
 run_end = 0
 det_time = 0
+detl_time
 total_time = 0
 eff = "0"
+effl = "0"
 
-def Module4(img, posture, guess, cam_fb):
-    global run_start, run_end, init_4, det_time, total_time, eff
+def Module4(img, posture, guess, leap_posture, leap_guess, cam_fb):
+    global run_start, run_end, init_4, det_time, total_time, eff, effl, detl_time
 
     key = cv2.waitKey(1)
     if key == 107 and not init_4:
@@ -25,7 +27,16 @@ def Module4(img, posture, guess, cam_fb):
         total_time += 1
         if (posture==guess):
             det_time += 1
-        # Efficiency comparison REVISE
+        if (leap_posture==leap_guess):
+            detl_time += 1
+            if (len(effl) <= 1):
+                if (time.time() - run_start) == 0:
+                    effl = "| L_Efficiency: 0s"
+                else:
+                    t_fps = np.divide(total_time, time.time() - run_start)
+                    effl = np.divide(total_time, t_fps)
+                    effl = "| L_Efficiency: {:.2f}s".format(effl)
+
         if (posture==guess and len(eff) <= 1):
             if (time.time() - run_start) == 0:
                 eff = "| Efficiency: 0s"
@@ -41,6 +52,11 @@ def Module4(img, posture, guess, cam_fb):
             print("| Accuracy: {}%".format(100))
         else:
             print("| Accuracy: {}%".format(total_time - det_time, np.divide(det_time, total_time)*100))
+
+        if (total_time - detl_time) == 0:
+            print("| L_Accuracy: 100%")
+        else:
+            print("| L_Accuracy: {}%".format(total_time - detl_time, np.divide(detl_time, total_time)*100))
         l_frames = cam_fb - _fps
         if (l_frames <= 0):
             l_frames = 0
@@ -48,4 +64,5 @@ def Module4(img, posture, guess, cam_fb):
         print("| |{}| |{}|".format(total_time, det_time))
         print("########################\n")
         det_time = 0
+        detl_time = 0
         total_time = 0
