@@ -6,45 +6,56 @@ from matplotlib import pyplot as plt
 handCords = []
 
 def unitVector(vector):
-	return vector / np.linalg.norm(vector)
+    return vector / np.linalg.norm(vector)
 
 def angle(uv1, uv2):
     return np.arccos(np.clip(np.dot(uv1, uv2), -1.0, 1.0))
 
 def module3(cords):
-	global handCords
-	handCords = cords
+    # Required array of finger-coords
+    # [ x_thumb, y_thumb,
+    #   x_index, y_index, 
+    #   x_middle, y_middle,
+    #   x_ring, y_ring
+    #   x_pinky, y_pinky
+    #   x_center, y_center ]
+    if (cords == None):
+        print("The Leap Motion did not return anything, it may be offline")
+        break
+    global handCords
+    handCords = cords
 
-	index = np.array([cords[2], cords[3]])
-	middle = np.array([cords[4], cords[5]])
-	ring = np.array([cords[6], cords[7]])
+    thumb = np.array([cords[0], cords[1]])
+    index = np.array([cords[2], cords[3]])
+    middle = np.array([cords[4], cords[5]])
+    ring = np.array([cords[6], cords[7]])
 
-	indexUnit = unitVector(index)
-	middleUnit = unitVector(middle)
-	ringUnit = unitVector(ring)
+    thumbUnit = unitVector(thumb)
+    indexUnit = unitVector(index)
+    middleUnit = unitVector(middle)
+    ringUnit = unitVector(ring)
 
-	imAngle = np.degrees(angle(indexUnit, middleUnit))
-	mrAngle = np.degrees(angle(middleUnit, ringUnit))
+    tiAngle = np.degrees(angle(thumbUnit, indexUnit))
+    imAngle = np.degrees(angle(indexUnit, middleUnit))
+    mrAngle = np.degrees(angle(middleUnit, ringUnit))
 
-	print(imAngle, mrAngle)
-	'''
-	indexMag = np.linalg.norm(index)
-	middleMag = np.linalg.norm(middle)
-	ringMag = np.linalg.norm(ring)
+    print(tiAngle, imAngle, mrAngle)
+    '''
+    indexMag = np.linalg.norm(index)
+    middleMag = np.linalg.norm(middle)
+    ringMag = np.linalg.norm(ring)
 
-	imAngle = (index[0]*middle[0])+(index[1]*middle[1])/(indexMag*middleMag)
-	mrAngle = (ring[0]*middle[0])+(ring[1]*middle[1])/(middleMag*ringMag)
-	#imAngle = np.arccos(imAngle)
-	#mrAngle = np.arccos(mrAngle)
+    imAngle = (index[0]*middle[0])+(index[1]*middle[1])/(indexMag*middleMag)
+    mrAngle = (ring[0]*middle[0])+(ring[1]*middle[1])/(middleMag*ringMag
+    #imAngle = np.arccos(imAngle
+    #mrAngle = np.arccos(mrAngle)
 
-	print(index, indexMag)
-	print(middle, middleMag)
-	print(ring, ringMag)
-	print(imAngle, mrAngle)
-	print(np.dot(index, middle))
-	print((indexMag*middleMag))
-	print(np.dot(middle, ring))
-	print((middleMag*ringMag))
-	'''
-test = np.array([2, 8, 5, 5, 5, -5, -5, -9, 2, 3, 4, 5])
-module3(test)
+    print(index, indexMag)
+    print(middle, middleMag)
+    print(ring, ringMag)
+    print(imAngle, mrAngle)
+    print(np.dot(index, middle))
+    print((indexMag*middleMag))
+    print(np.dot(middle, ring))
+    print((middleMag*ringMag))
+    '''

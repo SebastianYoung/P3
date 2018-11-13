@@ -3,7 +3,9 @@ import numpy as np
 import sys
 import math
 import intsoft.RPS as RPS
-import Module4.mod4 as M4
+import Module1.Module1 as M1
+import Module4.Module4 as M4
+import Module3.Module3 as M3
 
 cap = cv2.VideoCapture(0)
 
@@ -301,7 +303,7 @@ while True:
 
     # Module 4 hook
     M4.Module4(frame, RPS.RPS.ROCK, RPS.RPS.ROCK, cap.get(cv2.CAP_PROP_FPS))
-
+    M3.Module3(Module1.leapMotion()) 
 ########################################################################################################################
 #                                                                                                                      #
 #                                                 Showing Windows                                                      #
