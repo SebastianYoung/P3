@@ -4,14 +4,15 @@ init_4 = False
 run_start = 0
 run_end = 0
 det_time = 0
-detl_time
+detl_time = 0
 total_time = 0
 eff = "0"
 effl = "0"
 
 def Module4(img, posture, guess, leap_posture, leap_guess, cam_fb):
     global run_start, run_end, init_4, det_time, total_time, eff, effl, detl_time
-
+    if not (leap_guess == None):
+    	print(leap_guess)
     key = cv2.waitKey(1)
     if key == 107 and not init_4:
         init_4 = True
@@ -29,6 +30,7 @@ def Module4(img, posture, guess, leap_posture, leap_guess, cam_fb):
             det_time += 1
         if (leap_posture==leap_guess):
             detl_time += 1
+            print("SCISSOR")
             if (len(effl) <= 1):
                 if (time.time() - run_start) == 0:
                     effl = "| L_Efficiency: 0s"
@@ -50,18 +52,20 @@ def Module4(img, posture, guess, leap_posture, leap_guess, cam_fb):
         print("| REAL FPS: {0:.2f}".format(_fps))
         if (total_time - det_time) == 0:
             print("| Accuracy: {}%".format(100))
+            if (det_time == 0):
+	            print("| Accuracy: 0%")
         else:
-            print("| Accuracy: {}%".format(total_time - det_time, np.divide(det_time, total_time)*100))
+            print("| Accuracy: {}%".format(np.divide(det_time, total_time)*100))
 
         if (total_time - detl_time) == 0:
             print("| L_Accuracy: 100%")
         else:
-            print("| L_Accuracy: {}%".format(total_time - detl_time, np.divide(detl_time, total_time)*100))
+            print("| L_Accuracy: {}%".format(np.divide(detl_time, total_time)*100))
         l_frames = cam_fb - _fps
         if (l_frames <= 0):
             l_frames = 0
         print("{}, lost frames: {:.2f}".format(eff, l_frames))
-        print("| |{}| |{}|".format(total_time, det_time))
+        print("| |{}| |{}| |{}|".format(total_time, det_time, detl_time))
         print("########################\n")
         det_time = 0
         detl_time = 0

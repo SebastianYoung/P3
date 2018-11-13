@@ -5,7 +5,7 @@ SCALE = 15;
 GUESS_TIME = 5
 RPS = Enum(
     "RPS",
-    "ROCK PAPER SCISSORS"
+    "ROCK PAPER SCISSOR"
 )
 
 # -- -- #
@@ -17,7 +17,7 @@ def GetRndPosture():
     choices = {
         0: RPS.ROCK,
         1: RPS.PAPER,
-        2: RPS.SCISSORS
+        2: RPS.SCISSOR
     }
     global time_correct
     time_correct = 0
