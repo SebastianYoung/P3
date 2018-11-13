@@ -13,9 +13,6 @@ go = False
 start = True
 actualColour = [0, 0, 0]
 actualShadowColour = [0, 0, 0]
-
-
-
 minlen = 32
 maxlen = 62
 
@@ -28,7 +25,7 @@ while True:
     frame = cv2.flip(frame, 1)
     copyFrame = frame.copy()
 
-    # Converts the video capture to HSV
+    # Converts the video capture to HSVg
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     if start:
@@ -74,10 +71,6 @@ while True:
             # Creates a variable which holds the histogram of the area in calibrateMask between the values of 0 and 256
             histr = cv2.calcHist([caliMasked_hsv], [each], calibrateMask, [256], [0, 256])
 
-            # For testing and adjusting values
-            print(histr.max())
-
-
             # Checks each value in the histogram, if the value it finds is the same as the maximum value of the
             # histogram, then append that value to the array actualColour.
             for i in range(256):
@@ -120,10 +113,11 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
-    # The current colour ranges used for calibration
+    # The colour array used for the 'c' calibration
     lowerCalibratedColour = np.array([actualColour[0] - 10, actualColour[1] - 40, actualColour[2] - 40])
     upperCalibratedColour = np.array([actualColour[0] + 10, actualColour[1] + 40, actualColour[2] + 40])
 
+    # The colour array used for the 's' calibration
     lowerCalibratedShadowColour = np.array([actualShadowColour[0] - 10, actualShadowColour[1] - 40, actualShadowColour[2] - 40])
     upperCalibratedShadowColour = np.array([actualShadowColour[0] + 10, actualShadowColour[1] + 40, actualShadowColour[2] + 40])
 
@@ -132,16 +126,20 @@ while True:
     mask = cv2.inRange(hsv, lowerCalibratedColour, upperCalibratedColour)
     mask2 = cv2.inRange(hsv, lowerCalibratedShadowColour, upperCalibratedShadowColour)
 
-    # Bitwise conjunction with the mask
-    res = cv2.bitwise_and(frame, frame, mask = mask)
-    res2 = cv2.bitwise_and(frame, frame, mask = mask2)
-
-    # Does nothing at the moment but the 2nd argument here is where we can put the callibrated shadows
+    # Merges the two masks we have, each mask being a single calibration array of the colour.
     finalRes = cv2.bitwise_or(mask, mask2, mask=None)
 
-    # Thresholds the image an inverses it so the only thing left are our hand
-    thresh, res_thresh = cv2.threshold(res, 0, 255, cv2.THRESH_BINARY_INV)
-    thresh2, res_thresh2 = cv2.threshold(res2, 0, 255, cv2.THRESH_BINARY_INV)
+    openKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(8,8))
+    closeKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
+    
+ #   finalRes = cv2.erode(finalRes, openKernel)
+
+#    finalRes = cv2.dilate(finalRes, closeKernel)
+
+    # finalRes = cv2.morphologyEx(finalRes, cv2.MORPH_CLOSE, openKernel)
+
+    fingerRes = cv2.bitwise_or(mask, mask, mask = None)
+
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -153,7 +151,7 @@ while True:
 
     # This adaptThreshold creates an outline similar to how Edge Detection would
     # This is used to find the contours in the users hand
-    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)
+    res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 29, 2)
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -162,23 +160,6 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
-    testKey = cv2.waitKey(1) & 0xFF
-
-    # Specifies that the key input should be 'c'
-    if testKey == ord('+'):
-        minlen = minlen + 1
-        # print("minlen: " + str(minlen))
-
-    if testKey == ord('-'):
-        minlen = minlen - 1
-        # print("minlen: " + str(minlen))
-
-    if testKey == ord('/'):
-        maxlen = maxlen + 1
-        # print("maxlen: " + str(maxlen))
-    if testKey == ord('*'):
-        maxlen = maxlen - 1
-        # print("maxlen: " + str(maxlen))
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -191,7 +172,7 @@ while True:
     # The _ in the beginning indicate that we do not want to store the first output of this function.
     # The function uses an algorithm developed by by Satoshi Suzuki and Keiichi Abe in 1985.
     # We do not need to explain exactly how this algorithm works.
-    _, cnt, _ = cv2.findContours(res_adaptThresh, 2, 1)
+    _, cnt, _ = cv2.findContours(res_adaptThresh, 2,3)
 
     if (len(cnt) > 0):
         maxArea = -1
@@ -200,7 +181,6 @@ while True:
             temp = cnt[i]
             area = cv2.contourArea(temp)
             tmh = cv2.convexHull(temp, returnPoints=False)
-            tmv = cv2.convexityDefects(temp, tmh)
 
             if area > maxArea and not handFound:
                 try:
@@ -237,6 +217,8 @@ while True:
                 diff_e2 = np.linalg.norm((tmp_e[1] - end[1]))
                 glob = diff_s1 + diff_s2 + diff_e1 + diff_e2
                 dist = 3
+                glob_S = diff_s1 + diff_s2
+                print("Glob_S is equal to " + str(glob_S))
                 if glob <= dist:
                     continue
             tmp_s = start
@@ -251,30 +233,34 @@ while True:
 
             cv2.line(frame, start, far, [0, 0, 255], 1)
             cv2.line(frame, end, far, [0, 0, 255], 1)
+
             cv2.circle(frame, far, 3, [0, 200, 0], -1)
 
-            cv2.putText(frame, str(i), end, 1, 1, (0, 0, 255), 2)
+
+
+
+            # cv2.putText(frame, str(i), end, 1, 1, (0, 0, 255), 2)
             M = cv2.moments(cnt)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
             cv2.putText(frame, "Center", (cX - 25, cY - 10), 1, 1, (0, 0, 255), 2)
-            cv2.circle(frame, (cX, cY), 3, [255, 255, 0], -1)
-            bounding_rect = cv2.boundingRect(cnt[i])
 
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
-            # print(cX)
-            # print("The Euclidian distance of: " + str(i) + " is: " + str(centdis))
-            # print("The Ratio of the Euclidian distance is: {}".format(centdis/area))
-            # averageX = (cX + start[0])/2
-            # averageY = (cY + start[1])/2
+
+            for c in cnt:
+                peri = (cv2.arcLength(c, True))
+                approx = cv2.approxPolyDP(c, 0.01 * peri, True)
+                x, y, w, h = cv2.boundingRect(approx)
+                cv2.rectangle(copyFrame, (x, y), (w+x, h+y), (0, 255, 0), 1)
+
+            if start[1] <= cY + 10 and glob_S > 70:
+                for k in range(5):
+                    cv2.line(frame, (cX, cY), start, [255, 255, 255], 1)
+                    cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
+                    cv2.putText(copyFrame, str(i) + str(tmp_e), start, 1, 1, (255, 255, 255), 2)
 
 
-            if 0.001 <= (centdis/area) <= 0.0022:
-                cv2.line(frame, (cX, cY), start, [255,255,255], 1)
-                cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
 
-                cv2.putText(copyFrame, str(centdis/area), start, 1, 1, (255, 255, 255), 2)
-                cv2.circle(copyFrame, start, 10, [0, 0, int(centdis) * 2], -1)
 
             go = True
     except Exception as e:
@@ -312,8 +298,10 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
     cv2.imshow("Original Frame", frame)
+
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
     cv2.imshow("Frame Copy", copyFrame)
+
     k = cv2.waitKey(1) & 0xFF
     if k == 27:
         break
