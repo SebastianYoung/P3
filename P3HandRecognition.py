@@ -2,12 +2,17 @@ import cv2
 import numpy as np
 import sys
 import math
-import intsoft.RPS as RPS
-import Module1.Module1 as M1
-import Module4.Module4 as M4
-import Module3.Module3 as M3
 
-cap = cv2.VideoCapture(1)
+# Imports the UI
+import intsoft.RPS as RPS
+
+# Imports module 1, 3 and 4
+# import Module1.Module1 as M1
+# import Module3.Module3 as M3
+# import Module4.Module4 as M4
+
+# The video Capture (0) for inbuild camera, (1) for external Camera
+cap = cv2.VideoCapture(0)
 
 go = False
 start = True
@@ -28,6 +33,7 @@ while True:
     # Converts the video capture to HSVg
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
+    # Creates an array filled with zeroes the same size as the frame, our main video capture window
     if start:
         hullMask = np.zeros_like(frame)
         start = False
@@ -77,12 +83,6 @@ while True:
                 if histr[i] == histr.max():
                     actualColour.append(i)
 
-            # For testing and adjusting values in the calibration
-            print(actualColour)
-            print(hsv[240, 320])
-
-    key = cv2.waitKey(1) & 0xFF
-
     # Specifies that the key input should be 'c'
     if key == ord('s'):
 
@@ -129,30 +129,9 @@ while True:
     # Merges the two masks we have, each mask being a single calibration array of the colour.
     finalRes = cv2.bitwise_or(mask, mask2, mask=None)
 
-    openKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(8,8))
-    closeKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
-
-    fingerRes = cv2.bitwise_or(mask, mask, mask = None)
-
-
-########################################################################################################################
-#                                                                                                                      #
-#                                                   Blurring                                                           #
-#                                                                                                                      #
-#                                                                                                                      #
-#                                                                                                                      #
-########################################################################################################################
-
     # This adaptThreshold creates an outline similar to how Edge Detection would
     # This is used to find the contours in the users hand
     res_adaptThresh = cv2.adaptiveThreshold(finalRes, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 29, 2)
-
-########################################################################################################################
-#                                                                                                                      #
-#                            For changing the the size of the boundary box to be detected                              #
-#                                                                                                                      #
-#                                                                                                                      #
-########################################################################################################################
 
 
 ########################################################################################################################
@@ -168,7 +147,7 @@ while True:
     # We do not need to explain exactly how this algorithm works.
     _, cnt, _ = cv2.findContours(res_adaptThresh, 2,3)
 
-    if (len(cnt) > 0):
+    if (len(cnt) > 8):
         maxArea = -1
         handFound = False
         for i in range(len(cnt)):
@@ -182,6 +161,7 @@ while True:
                     ci = i
                 except:
                     print("err")
+            # Specifies the minimum and maximum size of the object, helps our program ignore noise
             if len(tmh) >= minlen and len(tmh) <= maxlen:
                 handFound = True
                 ci = i
@@ -201,6 +181,8 @@ while True:
             s, e, f, d = defects[i, 0]
             start = tuple(cnt[s][0])
             end = tuple(cnt[e][0])
+
+            # Location of the concave areas in the target hand's boundary box
             far = tuple(cnt[f][0])
 
             if go:
@@ -223,38 +205,47 @@ while True:
             #                                              Drawing                                                     #
             #                                                                                                          #
             ############################################################################################################
+            # Draws the boundary box Blue
             cv2.line(frame, start, end, [255, 0, 0], 1)
 
+            # Draws lines between the breaks in the boundary box? Changing the 1 at the end will give a better idea
             cv2.line(frame, start, far, [0, 0, 255], 1)
+
+            # Draws line between the other breaks in the boundary box? Changing the 1 at the end will give a better idea
             cv2.line(frame, end, far, [0, 0, 255], 1)
 
+            # Creates circles at the point where in between the users fingers.
             cv2.circle(frame, far, 3, [0, 200, 0], -1)
 
-
-
-
-            # cv2.putText(frame, str(i), end, 1, 1, (0, 0, 255), 2)
+            # Calculates the moments of the contours of the hand.
+            # An image moment is a certain particular weighted average of the image pixels' intensities.
+            # This locates the center of the target object (The user's Glove)
             M = cv2.moments(cnt)
+
+            # Assigns the X and Y value of the moments to a variable respectively.
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
+
+            # Puts the text "Center" at a location slightly above the moment of the target object (The user's Glove)
             cv2.putText(frame, "Center", (cX - 25, cY - 10), 1, 1, (0, 0, 255), 2)
 
+            # Calculates the Euclidian distance between the moment of the hand and the bondary box's points.
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
 
+            # Creates a close bounding box around the entire hand that. Not used for anything other than showing.
             for c in cnt:
                 peri = (cv2.arcLength(c, True))
                 approx = cv2.approxPolyDP(c, 0.01 * peri, True)
                 x, y, w, h = cv2.boundingRect(approx)
                 cv2.rectangle(copyFrame, (x, y), (w+x, h+y), (0, 255, 0), 1)
 
+            # Used to place the coordinates of each individual finger at their respected location.
+            # Requires that the fingers are above the center of the pixel density (the moment).
+            # Still testing how to use the glob_S
             if start[1] <= cY + 10 and glob_S > 70:
-                for k in range(5):
-                    cv2.line(frame, (cX, cY), start, [255, 255, 255], 1)
-                    cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
-                    cv2.putText(copyFrame, str(i) + str(tmp_e), start, 1, 1, (255, 255, 255), 2)
-
-
-
+                cv2.line(frame, (cX, cY), start, [255, 255, 255], 1)
+                cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
+                cv2.putText(copyFrame, str(i) + str(tmp_e), start, 1, 1, (255, 255, 255), 2)
 
             go = True
     except Exception as e:
@@ -282,10 +273,10 @@ while True:
     RPS.IS(frame)
 
     # Module 4 hook
-    leapguess = M3.Module3(M1.leapMotion())
-    handguess = RPS.RPS.SCISSOR
+#     leapguess = M3.Module3(M1.leapMotion())
+#     handguess = RPS.RPS.SCISSOR
 
-    M4.Module4(frame, RPS.RPS.ROCK, handguess, RPS.RPS.SCISSOR, leapguess, cap.get(cv2.CAP_PROP_FPS))
+ #    M4.Module4(frame, RPS.RPS.ROCK, handguess, RPS.RPS.SCISSOR, leapguess, cap.get(cv2.CAP_PROP_FPS))
 ########################################################################################################################
 #                                                                                                                      #
 #                                                 Showing Windows                                                      #
@@ -293,8 +284,8 @@ while True:
 #                                                                                                                      #
 #                                                                                                                      #
 ########################################################################################################################
-    cv2.imshow("Original Frame", frame)
 
+    cv2.imshow("Original Frame", frame)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
     cv2.imshow("Frame Copy", copyFrame)
 
