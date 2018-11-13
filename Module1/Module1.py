@@ -22,7 +22,7 @@ def leapMotion():
 	return numpy.array(None)
 
 
-
+'''
 while (1):
 	image = numpy.zeros((imgSize[0], imgSize[1]), numpy.uint8)
 	image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
@@ -37,7 +37,7 @@ while (1):
 	k = cv2.waitKey(1)
 	if k == 27:
 		break
-
+'''
 '''
   Depricated implementation
 ======= 

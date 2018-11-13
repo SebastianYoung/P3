@@ -11,7 +11,7 @@ def unitVector(vector):
 def angle(uv1, uv2):
     return np.arccos(np.clip(np.dot(uv1, uv2), -1.0, 1.0))
 
-def module3(cords):
+def Module3(cords):
     # Required array of finger-coords
     # [ x_thumb, y_thumb,
     #   x_index, y_index, 
@@ -19,9 +19,9 @@ def module3(cords):
     #   x_ring, y_ring
     #   x_pinky, y_pinky
     #   x_center, y_center ]
-    if (cords == None):
+    if (cords.all() == None):
         print("The Leap Motion did not return anything, it may be offline")
-        break
+        return
     global handCords
     handCords = cords
 

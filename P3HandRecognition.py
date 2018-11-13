@@ -7,7 +7,7 @@ import Module1.Module1 as M1
 import Module4.Module4 as M4
 import Module3.Module3 as M3
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 go = False
 start = True
@@ -23,7 +23,7 @@ while True:
 
     # Flips the Image for Gab
     frame = cv2.flip(frame, 1)
-    copyFrame = frame.copy()
+    copyFrame = frame
 
     # Converts the video capture to HSVg
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -289,7 +289,7 @@ while True:
 
     # Module 4 hook
     M4.Module4(frame, RPS.RPS.ROCK, RPS.RPS.ROCK, cap.get(cv2.CAP_PROP_FPS))
-    M3.Module3(Module1.leapMotion()) 
+    M3.Module3(M1.leapMotion()) 
 ########################################################################################################################
 #                                                                                                                      #
 #                                                 Showing Windows                                                      #
