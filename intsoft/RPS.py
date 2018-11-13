@@ -48,6 +48,6 @@ def DrawGuess(im, cap, guess, debug):
             time_correct = FPS
     elif(time_correct > 0):
         time_correct -= 1
-    
+
     correct = np.divide(time_correct, float(FPS))
     cv2.putText(im, "GUESS: {} -> {} | Acc: {}%".format(guess, guess==rps_rnd, float(correct)*100), (int(im.shape[1]/2-SCALE), int(im.shape[0]-SCALE)), 1, 1, color=(0, 255, 0))
