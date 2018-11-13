@@ -129,12 +129,6 @@ while True:
 
     openKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(8,8))
     closeKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
-    
- #   finalRes = cv2.erode(finalRes, openKernel)
-
-#    finalRes = cv2.dilate(finalRes, closeKernel)
-
-    # finalRes = cv2.morphologyEx(finalRes, cv2.MORPH_CLOSE, openKernel)
 
     fingerRes = cv2.bitwise_or(mask, mask, mask = None)
 
