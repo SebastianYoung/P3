@@ -21,7 +21,6 @@ def leapMotion():
 		return fingerTips
 	return numpy.array(None)
 
-
 '''
 while (1):
 	image = numpy.zeros((imgSize[0], imgSize[1]), numpy.uint8)
