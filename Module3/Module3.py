@@ -11,17 +11,23 @@ def unitVector(vector):
 def angle(uv1, uv2):
     return np.arccos(np.clip(np.dot(uv1, uv2), -1.0, 1.0))
 
-def module3(cords):
+#Based on fingertip to fingertip
+def module3Tips(cords):
 	global handCords
 	handCords = cords
 
-	index = np.array([cords[2], cords[3]])
-	middle = np.array([cords[4], cords[5]])
-	ring = np.array([cords[6], cords[7]])
+	thumb	= np.array([cords[0], cords[1]])
+	index 	= np.array([cords[2], cords[3]])
+	middle 	= np.array([cords[4], cords[5]])
+	ring 	= np.array([cords[6], cords[7]])
 
-	indexUnit = unitVector(index)
-	middleUnit = unitVector(middle)
-	ringUnit = unitVector(ring)
+	index 	-= thumb
+	middle 	-= index
+	ring 	-= middle
+	
+	indexUnit 	= unitVector(index)
+	middleUnit 	= unitVector(middle)
+	ringUnit 	= unitVector(ring)
 
 	imAngle = np.degrees(angle(indexUnit, middleUnit))
 	mrAngle = np.degrees(angle(middleUnit, ringUnit))
@@ -36,15 +42,27 @@ def module3(cords):
 	mrAngle = (ring[0]*middle[0])+(ring[1]*middle[1])/(middleMag*ringMag)
 	#imAngle = np.arccos(imAngle)
 	#mrAngle = np.arccos(mrAngle)
-
-	print(index, indexMag)
-	print(middle, middleMag)
-	print(ring, ringMag)
-	print(imAngle, mrAngle)
-	print(np.dot(index, middle))
-	print((indexMag*middleMag))
-	print(np.dot(middle, ring))
-	print((middleMag*ringMag))
 	'''
-test = np.array([2, 8, 5, 5, 5, -5, -5, -9, 2, 3, 4, 5])
-module3(test)
+
+#Based on centre to fingertips
+def module3Centre(cords):
+	global handCords
+	handCords = cords
+
+	index 	= np.array([cords[2], cords[3]])
+	middle 	= np.array([cords[4], cords[5]])
+	ring 	= np.array([cords[6], cords[7]])
+	centre 	= np.array([cords[10], cords[11]])
+
+	index 	-= centre
+	middle 	-= centre
+	ring 	-= centre
+
+	indexUnit 	= unitVector(index)
+	middleUnit 	= unitVector(middle)
+	ringUnit 	= unitVector(ring)
+
+	imAngle = np.degrees(angle(indexUnit, middleUnit))
+	mrAngle = np.degrees(angle(middleUnit, ringUnit))
+
+	print(imAngle, mrAngle)
