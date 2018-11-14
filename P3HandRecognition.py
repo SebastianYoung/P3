@@ -277,6 +277,7 @@ while True:
 #     handguess = RPS.RPS.SCISSOR
 
  #    M4.Module4(frame, RPS.RPS.ROCK, handguess, RPS.RPS.SCISSOR, leapguess, cap.get(cv2.CAP_PROP_FPS))
+    # M4.Module4(frame, RPS.RPS.ROCK, handguess, 2, leapguess, cap.get(cv2.CAP_PROP_FPS))
 ########################################################################################################################
 #                                                                                                                      #
 #                                                 Showing Windows                                                      #
