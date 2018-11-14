@@ -13,6 +13,9 @@ def angle(uv1, uv2):
 
 #Based on fingertip to fingertip
 def module3Tips(cords):
+	if (cords.all() == None):
+        print("The Leap Motion did not return anything, it may be offline")
+        return
 	global handCords
 	handCords = cords
 
@@ -21,18 +24,23 @@ def module3Tips(cords):
 	middle 	= np.array([cords[4], cords[5]])
 	ring 	= np.array([cords[6], cords[7]])
 
+	thumb 	-= thumb
 	index 	-= thumb
 	middle 	-= index
 	ring 	-= middle
 	
+	thumbUnit	= unitVectir(thumb)
 	indexUnit 	= unitVector(index)
 	middleUnit 	= unitVector(middle)
 	ringUnit 	= unitVector(ring)
 
+	tiAngle = np.degrees(angle(thumbUnit, indexUnit))
 	imAngle = np.degrees(angle(indexUnit, middleUnit))
 	mrAngle = np.degrees(angle(middleUnit, ringUnit))
 
-	print(imAngle, mrAngle)
+	print("TI:{:.2f}, IM:{:.2f}, MR:{:.2f}".format(tiAngle, imAngle, mrAngle))
+    if (tiAngle >= 20 && mrAngle >= 14 && imAngle <= 20): # SCISSOR
+        return 2 # RPS.SCISSORS = 2
 	'''
 	indexMag = np.linalg.norm(index)
 	middleMag = np.linalg.norm(middle)
