@@ -245,7 +245,7 @@ while True:
             if start[1] <= cY + 10 and glob_S > 70:
                 cv2.line(frame, (cX, cY), start, [255, 255, 255], 1)
                 cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
-                cv2.putText(copyFrame, str(i) + str(tmp_e), start, 1, 1, (255, 255, 255), 2)
+                cv2.putText(copyFrame, str(i) + str(tmp_e), start, 1, 1, (0, 0, 0), 2)
 
             go = True
     except Exception as e:
