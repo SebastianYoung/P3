@@ -22,8 +22,7 @@ def leapMotion():
 	return numpy.array(None)
 
 
-
-while (1):
+'''while (1):
 	image = numpy.zeros((imgSize[0], imgSize[1]), numpy.uint8)
 	image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
 	fingerTips = leapMotion()
@@ -37,10 +36,10 @@ while (1):
 	k = cv2.waitKey(1)
 	if k == 27:
 		break
-
+'''
 '''
   Depricated implementation
-======= 
+  
 import sys
 
 if sys.version_info[0] == 3:
@@ -71,5 +70,4 @@ def main():
 			print("Doing things")
 			frame = controller.frame()
 			prevFrame = controller.frame(1)
->>>>>>> f4413e99c8638d1c3a84b3b4c251a5b7bf1cf0a7
 '''

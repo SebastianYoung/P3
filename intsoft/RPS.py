@@ -5,7 +5,7 @@ SCALE = 15;
 GUESS_TIME = 5
 RPS = Enum(
     "RPS",
-    "ROCK PAPER SCISSOR"
+    "ROCK PAPER SCISSOR "
 )
 
 # -- -- #
