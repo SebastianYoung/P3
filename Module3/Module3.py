@@ -9,7 +9,7 @@ def unitVector(vector):
 	return vector / np.linalg.norm(vector)
 
 def angle(uv1, uv2):
-    return np.arccos(np.clip(np.dot(uv1, uv2), -1.0, 1.0))
+	return np.arccos(np.clip(np.dot(uv1, uv2), -1.0, 1.0))
 
 #Based on fingertip to fingertip
 def module3Tips(cords):
@@ -25,7 +25,7 @@ def module3Tips(cords):
 	middle 	= middleCord - indexCord
 	ring 	= ringCord   - middleCord
 	
-	thumbUnit	= unitVectir(thumb)
+	thumbUnit	= unitVector(thumbCord)
 	indexUnit 	= unitVector(index)
 	middleUnit 	= unitVector(middle)
 	ringUnit 	= unitVector(ring)
@@ -35,18 +35,16 @@ def module3Tips(cords):
 	mrAngle = np.degrees(angle(middleUnit, ringUnit))
 
 	print("TI:{:.2f}, IM:{:.2f}, MR:{:.2f}".format(tiAngle, imAngle, mrAngle))
-    if (tiAngle <= 5 and tiAngle >= 0.5 and
-        imAngle <= 3 and imAngle >= 0.3 and
-        mrAngle <= 5 and mrAngle >= 0.9):
-        return 0 # Rock
-    if (tiAngle <= 11 and tiAngle >= 0 and
+	if (tiAngle <= 5 and tiAngle >= 0.5 and imAngle <= 3 and imAngle >= 0.3 and mrAngle <= 5 and mrAngle >= 0.9):
+		return 0 # Rock
+	if (tiAngle <= 11 and tiAngle >= 0 and
         imAngle <= 4 and imAngle >= 1 and
         mrAngle <= 6 and mrAngle >= 2):
-        return 1 # Paper
-    if (tiAngle <= 21 and tiAngle >= 4 and
+		return 1 # Paper
+	if (tiAngle <= 21 and tiAngle >= 4 and
         imAngle <= 15 and imAngle >= 7 and
         mrAngle <= 19 and mrAngle >= 4):
-        return 2 # Scissor
+		return 2 # Scissor
 	'''
 	indexMag = np.linalg.norm(index)
 	middleMag = np.linalg.norm(middle)

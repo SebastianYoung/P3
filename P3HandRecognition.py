@@ -298,11 +298,11 @@ while True:
     RPS.IS(frame)
 
     # Module 4 hook
-#     leapguess = M3.Module3(M1.leapMotion())
-#     handguess = RPS.RPS.SCISSOR
+    leapguess = M3.Module3(M1.leapMotion())
+    handguess = M3.Module3(module2Array)
 
- #    M4.Module4(frame, RPS.RPS.ROCK, handguess, RPS.RPS.SCISSOR, leapguess, cap.get(cv2.CAP_PROP_FPS))
-    # M4.Module4(frame, RPS.RPS.ROCK, handguess, 2, leapguess, cap.get(cv2.CAP_PROP_FPS))
+    M4.Module4(frame, RPS.RPS.ROCK, handguess, RPS.RPS.SCISSOR, leapguess, cap.get(cv2.CAP_PROP_FPS))
+    M4.Module4(frame, RPS.RPS.ROCK, handguess, 2, leapguess, cap.get(cv2.CAP_PROP_FPS))
 ########################################################################################################################
 #                                                                                                                      #
 #                                                 Showing Windows                                                      #
