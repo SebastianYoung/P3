@@ -13,14 +13,15 @@ def leapMotion():
 	if hands[0].is_valid:
 		fingers = hands[0].fingers
 		fingerTips = numpy.zeros(12)
-		for finger in fingers:
-			fingerTips[finger.type*2] = finger.bone(3).center[0]
-			fingerTips[finger.type*2 + 1] = finger.bone(3).center[1]
 		fingerTips[10] = hands[0].palm_position[0]
-		fingerTips[11] = hands[0].palm_position[1]
+		fingerTips[11] = hands[0].palm_position[2]
+		for finger in fingers:
+			fingerTips[finger.type*2] = finger.bone(3).center[0] - fingerTips[10]
+			fingerTips[finger.type*2 + 1] = finger.bone(3).center[2] - fingerTips[11]
 		return fingerTips
 	return numpy.array(None)
 
+'''
 while (1):
 	image = numpy.zeros((imgSize[0], imgSize[1]), numpy.uint8)
 	image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
@@ -29,14 +30,13 @@ while (1):
 	if fingerTips.any() != None:
 		for i in range(0,numpy.size(fingerTips), 2):
 			colour = [(255*i)/numpy.size(fingerTips),255,(255*i)/numpy.size(fingerTips)]
-			cv2.circle(image, (int(fingerTips[i]) + imgSize[0]/2, - int(fingerTips[i+1]) + imgSize[1]), 3, colour, -1)
+			cv2.circle(image, (int(fingerTips[i]) + imgSize[0]/2, int(fingerTips[i+1]) + imgSize[1]/2), 3, colour, -1)
 	cv2.imshow("Data", image)
 	
 	k = cv2.waitKey(1)
 	if k == 27:
 		break
-
-
+'''
 '''
   Depricated implementation
   
