@@ -20,7 +20,7 @@ actualColour = [0, 0, 0]
 actualShadowColour = [0, 0, 0]
 minlen = 32
 maxlen = 62
-
+module2Array = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
 while True:
 
@@ -194,7 +194,6 @@ while True:
                 glob = diff_s1 + diff_s2 + diff_e1 + diff_e2
                 dist = 3
                 glob_S = diff_s1 + diff_s2
-                print("Glob_S is equal to " + str(glob_S))
                 if glob <= dist:
                     continue
             tmp_s = start
@@ -242,11 +241,34 @@ while True:
             # Used to place the coordinates of each individual finger at their respected location.
             # Requires that the fingers are above the center of the pixel density (the moment).
             # Still testing how to use the glob_S
-            if start[1] <= cY + 10 and glob_S > 70:
+
+            cv2.putText(copyFrame, "({0},{1})".format(cX, cY), (cX, cY), 1, 1, (0, 0, 0), 2)
+            if start[1] <= cY + 10:
                 cv2.line(frame, (cX, cY), start, [255, 255, 255], 1)
                 cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
-                cv2.putText(copyFrame, str(i) + str(tmp_e), start, 1, 1, (255, 255, 255), 2)
-
+                cv2.putText(copyFrame, str(start), start, 1, 1, (0, 0, 255), 2)
+                if (start[0] <= cX - 130):
+                    cv2.putText(copyFrame, "Thumb", (start[0], start[1] - 10), 1, 1, (0, 0, 0), 2)
+                    module2Array[0] = start[0]
+                    module2Array[1] = start[1]
+                if (cX -130 < start[0] <= cX - 20):
+                    cv2.putText(copyFrame, "Pointy Fingy", (start[0], start[1] - 10), 1, 1, (0, 0, 0), 2)
+                    module2Array[2] = start[0]
+                    module2Array[3] = start[1]
+                if (cX - 15 < start[0] <= cX + 15):
+                    cv2.putText(copyFrame, "middle Fingy", (start[0], start[1] - 10), 1, 1, (0, 0, 0), 2)
+                    module2Array[4] = start[0]
+                    module2Array[5] = start[1]
+                if (cX +30 < start[0] <= cX + 60):
+                    cv2.putText(copyFrame, "Put a ring on it", (start[0], start[1] - 10), 1, 1, (0, 0, 0), 2)
+                    module2Array[6] = start[0]
+                    module2Array[7] = start[1]
+                if (cX +60 < start[0] <= cX + 120):
+                    cv2.putText(copyFrame, "Pinky Promise", (start[0], start[1] - 10), 1, 1, (0, 0, 0), 2)
+                    module2Array[8] = start[0]
+                    module2Array[9] = start[1]
+                module2Array[10] = cX
+                module2Array[11] = cY
             go = True
     except Exception as e:
         pass
