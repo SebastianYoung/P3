@@ -7,9 +7,9 @@ import math
 import intsoft.RPS as RPS
 
 # Imports module 1, 3 and 4
-# import Module1.Module1 as M1
-# import Module3.Module3 as M3
-# import Module4.Module4 as M4
+import Module1.Module1 as M1
+import Module3.Module3 as M3
+import Module4.Module4 as M4
 
 # The video Capture (0) for inbuild camera, (1) for external Camera
 cap = cv2.VideoCapture(0)
@@ -272,7 +272,6 @@ while True:
 
                 module2Array[10] = cX
                 module2Array[11] = cY
-                print(module2Array)
             go = True
     except Exception as e:
         pass
