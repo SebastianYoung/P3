@@ -12,7 +12,7 @@ import Module3.Module3 as M3
 import Module4.Module4 as M4
 
 # The video Capture (0) for inbuild camera, (1) for external Camera
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 go = False
 start = True
@@ -298,8 +298,8 @@ while True:
     RPS.IS(frame)
 
     # Module 4 hook
-    leapguess = M3.Module3(M1.leapMotion())
-    handguess = M3.Module3(module2Array)
+    leapguess = M3.module3Centre(M1.leapMotion())
+    handguess = 2#M3.module3Tips(module2Array)
 
     M4.Module4(frame, RPS.RPS.ROCK, handguess, RPS.RPS.SCISSOR, leapguess, cap.get(cv2.CAP_PROP_FPS))
     M4.Module4(frame, RPS.RPS.ROCK, handguess, 2, leapguess, cap.get(cv2.CAP_PROP_FPS))
