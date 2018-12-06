@@ -58,23 +58,58 @@ def module3Tips(cords):
 
 #Based on centre to fingertips
 def module3Centre(cords):
+	if(cords.any() == None):
+		return
 	global handCords
 	handCords = cords
 
+	thumb 	= np.array([cords[0], cords[1]])
 	index 	= np.array([cords[2], cords[3]])
 	middle 	= np.array([cords[4], cords[5]])
 	ring 	= np.array([cords[6], cords[7]])
 	centre 	= np.array([cords[10], cords[11]])
 
+	thumb 	= centre - thumb
 	index 	= centre - index
 	middle 	= centre - middle
 	ring 	= centre - ring
 
+	thumbUnit	= unitVector(thumb)
 	indexUnit 	= unitVector(index)
 	middleUnit 	= unitVector(middle)
 	ringUnit 	= unitVector(ring)
-
+	
+	tiAngle = np.degrees(angle(thumbUnit, indexUnit))
 	imAngle = np.degrees(angle(indexUnit, middleUnit))
 	mrAngle = np.degrees(angle(middleUnit, ringUnit))
+	'''
+	thumbMag 	= np.linalg.norm(thumb)
+	indexMag 	= np.linalg.norm(index)
+	middleMag 	= np.linalg.norm(middle)
+	ringMag 	= np.linalg.norm(ring)
 
-	print(imAngle, mrAngle)
+	tiAngle = ((thumb[0] * index[0]) + (thumb[1] * index[1])) / (thumbMag * indexMag)
+	imAngle = ((index[0] * middle[0]) + (index[1] * middle[1])) / (indexMag * middleMag)
+	mrAngle = ((middle[0] * ring[0]) + (middle[1] * ring[1])) / (middleMag * ringMag)
+
+	tiAngle = np.degrees(np.arccos(tiAngle))
+	imAngle = np.degrees(np.arccos(imAngle))
+	mrAngle = np.degrees(np.arccos(mrAngle))
+	'''
+
+	print(tiAngle, imAngle, mrAngle)
+	if (tiAngle >= 21 and imAngle <= 17 and not mrAngle >= 100): #PAPER
+			#and 18 <= imAngle >= 11
+			#and 16 <= mrAngle >= 10):
+		print("PAPER");
+		return 1;
+	if (tiAngle <= 50 and imAngle >= 10 and imAngle <= 30 and (mrAngle >= 40 or mrAngle <= 30)):
+		print("SCISSOR");
+		return 2;
+	if (tiAngle <= 110
+		and imAngle >= 8 and imAngle <= 150
+		and mrAngle >= 35 and mrAngle <= 130):
+		print("ROCK");
+		return 0;
+
+	return -1;
