@@ -317,6 +317,7 @@ while True:
     leapguess = M3.module3Centre(M1.leapMotion())
     handguess = M3.module3Centre(module2Array)
 
+
     M4.Module4(frame, RPS.RPS.ROCK, handguess, RPS.RPS.SCISSOR, leapguess, cap.get(cv2.CAP_PROP_FPS))
     M4.Module4(frame, RPS.RPS.ROCK, handguess, 2, leapguess, cap.get(cv2.CAP_PROP_FPS))
 ########################################################################################################################

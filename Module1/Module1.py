@@ -16,8 +16,10 @@ def leapMotion():
 		fingerTips[10] = hands[0].palm_position[0]
 		fingerTips[11] = hands[0].palm_position[2]
 		for finger in fingers:
+
 			fingerTips[finger.type*2] = finger.bone(3).center[0]
 			fingerTips[finger.type*2 + 1] = finger.bone(3).center[2]
+
 		return fingerTips
 	return numpy.array(None)
 

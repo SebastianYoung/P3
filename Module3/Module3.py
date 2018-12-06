@@ -13,38 +13,41 @@ def angle(uv1, uv2):
 
 #Based on fingertip to fingertip
 def module3Tips(cords):
-	global handCords
-	handCords = cords
+    print(cords)
+    if cords.any() == None:
+        return -1
+    global handCords
+    handCords = cords
 
-	thumbCord	= np.array([cords[0], cords[1]])
-	indexCord 	= np.array([cords[2], cords[3]])
-	middleCord 	= np.array([cords[4], cords[5]])
-	ringCord 	= np.array([cords[6], cords[7]])
+    thumbCord	= np.array([cords[0], cords[1]])
+    indexCord 	= np.array([cords[2], cords[3]])
+    middleCord 	= np.array([cords[4], cords[5]])
+    ringCord 	= np.array([cords[6], cords[7]])
 
-	index 	= indexCord  - thumbCord
-	middle 	= middleCord - indexCord
-	ring 	= ringCord   - middleCord
+    index 	= indexCord  - thumbCord
+    middle 	= middleCord - indexCord
+    ring 	= ringCord   - middleCord
 	
-	thumbUnit	= unitVector(thumbCord)
-	indexUnit 	= unitVector(index)
-	middleUnit 	= unitVector(middle)
-	ringUnit 	= unitVector(ring)
+    thumbUnit	= unitVector(thumbCord)
+    indexUnit 	= unitVector(index)
+    middleUnit 	= unitVector(middle)
+    ringUnit 	= unitVector(ring)
 
-	tiAngle = np.degrees(angle(thumbUnit, indexUnit))
-	imAngle = np.degrees(angle(indexUnit, middleUnit))
-	mrAngle = np.degrees(angle(middleUnit, ringUnit))
+    tiAngle = np.degrees(angle(thumbUnit, indexUnit))
+    imAngle = np.degrees(angle(indexUnit, middleUnit))
+    mrAngle = np.degrees(angle(middleUnit, ringUnit))
 
-	print("TI:{:.2f}, IM:{:.2f}, MR:{:.2f}".format(tiAngle, imAngle, mrAngle))
-	if (tiAngle <= 5 and tiAngle >= 0.5 and imAngle <= 3 and imAngle >= 0.3 and mrAngle <= 5 and mrAngle >= 0.9):
-		return 0 # Rock
-	if (tiAngle <= 11 and tiAngle >= 0 and
+    print("TI:{:.2f}, IM:{:.2f}, MR:{:.2f}".format(tiAngle, imAngle, mrAngle))
+    if (tiAngle <= 5 and tiAngle >= 0.5 and imAngle <= 3 and imAngle >= 0.3 and mrAngle <= 5 and mrAngle >= 0.9):
+        return 0 # Rock
+    if (tiAngle <= 11 and tiAngle >= 0 and
         imAngle <= 4 and imAngle >= 1 and
         mrAngle <= 6 and mrAngle >= 2):
-		return 1 # Paper
-	if (tiAngle <= 21 and tiAngle >= 4 and
+        return 1 # Paper
+    if (tiAngle <= 21 and tiAngle >= 4 and
         imAngle <= 15 and imAngle >= 7 and
         mrAngle <= 19 and mrAngle >= 4):
-		return 2 # Scissor
+        return 2 # Scissor
 	'''
 	indexMag = np.linalg.norm(index)
 	middleMag = np.linalg.norm(middle)
@@ -113,3 +116,4 @@ def module3Centre(cords):
 		return 0;
 
 	return -1;
+
