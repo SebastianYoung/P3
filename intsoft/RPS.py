@@ -3,10 +3,6 @@ from enum import Enum
 
 SCALE = 15;
 GUESS_TIME = 5
-RPS = Enum(
-    "RPS",
-    "ROCK PAPER SCISSOR"
-)
 
 # -- -- #
 time_correct = 0
@@ -14,14 +10,9 @@ time_correct = 0
 # Get random new posture from system to compare with software
 def GetRndPosture():
     rnd = random.randint(0, 2);
-    choices = {
-        0: RPS.ROCK,
-        1: RPS.PAPER,
-        2: RPS.SCISSOR
-    }
     global time_correct
     time_correct = 0
-    return choices.get(rnd, 'default')
+    return rnd
 
 # Set initial global values
 rps_rnd = GetRndPosture()
@@ -33,9 +24,19 @@ def IS(im):
     if (time.time() - rps_t > GUESS_TIME):
         rps_t = time.time()
         rps_rnd = GetRndPosture()
-    cv2.putText(im, "{}".format(rps_rnd), (SCALE+1, im.shape[0]-SCALE+1), 1, 1, (0,0,0)) #Text shadow
-    cv2.putText(im, "{}".format(rps_rnd), (SCALE, im.shape[0]-SCALE), 1, 1, (255,255,255))
+    the_print = ""
+    if (rps_rnd == 0):
+        the_print = "Rock"
+    if (rps_rnd == 1):
+        the_print = "Paper"
+    if (rps_rnd == 2):
+        the_print = "Scissor"
+    cv2.putText(im, "{}".format(the_print), (SCALE+1, im.shape[0]-SCALE+1), 1, 1, (0,0,0)) #Text shadow
+    cv2.putText(im, "{}".format(the_print), (SCALE, im.shape[0]-SCALE), 1, 1, (255,255,255))
 
+def retRandom():
+    global rps_rnd
+    return rps_rnd
 # Debugs & Draw the guess result
 def DrawGuess(im, cap, guess, debug):
     global time_correct, rps_rnd

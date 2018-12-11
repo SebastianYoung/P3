@@ -27,7 +27,7 @@ def module3Tips(cords):
     index 	= indexCord  - thumbCord
     middle 	= middleCord - indexCord
     ring 	= ringCord   - middleCord
-	
+
     thumbUnit	= unitVector(thumbCord)
     indexUnit 	= unitVector(index)
     middleUnit 	= unitVector(middle)
@@ -44,9 +44,9 @@ def module3Tips(cords):
         imAngle <= 4 and imAngle >= 1 and
         mrAngle <= 6 and mrAngle >= 2):
         return 1 # Paper
-    if (tiAngle <= 21 and tiAngle >= 4 and
-        imAngle <= 15 and imAngle >= 7 and
-        mrAngle <= 19 and mrAngle >= 4):
+    if (tiAngle <= 140 and tiAngle >= 50 and
+        imAngle <= 35 and imAngle >= 15):# and
+        #mrAngle <= 19 and mrAngle >= 100):
         return 2 # Scissor
 	'''
 	indexMag = np.linalg.norm(index)
@@ -100,19 +100,19 @@ def module3Centre(cords):
 	mrAngle = np.degrees(np.arccos(mrAngle))
 	'''
 
-	print(tiAngle, imAngle, mrAngle)
-	if (tiAngle >= 21 and imAngle <= 17 and not mrAngle >= 100): #PAPER
+	#print(tiAngle, imAngle, mrAngle)
+	if (tiAngle >= 60 and imAngle <= 17 and not mrAngle >= 100): #PAPER
 			#and 18 <= imAngle >= 11
 			#and 16 <= mrAngle >= 10):
-		print("PAPER");
+	#	print("PAPER");
 		return 1;
-	if (tiAngle <= 50 and imAngle >= 10 and imAngle <= 30 and (mrAngle >= 40 or mrAngle <= 30)):
-		print("SCISSOR");
+	if (tiAngle <= 170 and tiAngle >= 30 and imAngle <= 35 and imAngle >= 15 and mrAngle >= 90):#and (mrAngle >= 40 or mrAngle <= 30)):
+	#	print("SCISSOR");
 		return 2;
-	if (tiAngle <= 110
-		and imAngle >= 8 and imAngle <= 150
-		and mrAngle >= 35 and mrAngle <= 130):
-		print("ROCK");
+	if (tiAngle <= 50
+		and imAngle >= 1 and imAngle <= 35):
+		#and mrAngle <= 35):
+	#	print("ROCK");
 		return 0;
 
 	return -1;

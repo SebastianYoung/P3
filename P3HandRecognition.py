@@ -232,11 +232,11 @@ while True:
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
 
             # Creates a close bounding box around the entire hand that. Not used for anything other than showing.
-            for c in cnt:
-                peri = (cv2.arcLength(c, True))
-                approx = cv2.approxPolyDP(c, 0.01 * peri, True)
-                x, y, w, h = cv2.boundingRect(approx)
-                cv2.rectangle(copyFrame, (x, y), (w+x, h+y), (0, 255, 0), 1)
+           # for c in cnt:
+            #    peri = (cv2.arcLength(c, True))
+             #   approx = cv2.approxPolyDP(c, 0.01 * peri, True)
+              #  x, y, w, h = cv2.boundingRect(approx)
+               # cv2.rectangle(copyFrame, (x, y), (w+x, h+y), (0, 255, 0), 1)
 
             # Used to place the coordinates of each individual finger at their respected location.
             # Requires that the fingers are above the center of the pixel density (the moment).
@@ -278,12 +278,12 @@ while True:
                 module2Array[11] = cY
 
                 if (not module2Array.all() == 0):
-                    hand_posture = RPS.RPS.PAPER
-                elif (not module2Array[2] == 0 and not module2Array[4] == 0
-                      or module2Array[2] == 0 and not module2Array[6] == 0):
-                    hand_posture = RPS.RPS.SCISSOR
+                    hand_posture = 1
+                elif ((not module2Array[2] == 0 and not module2Array[4] == 0)
+                      or (not module2Array[2] == 0 and not module2Array[6] == 0)):
+                    hand_posture = 2
                 elif (module2Array[4] == 0 and not module2Array[0] == 0 and module2Array[2] == 0):
-                    hand_posture = RPS.RPS.ROCK
+                    hand_posture = 0
 
 
 
@@ -312,14 +312,14 @@ while True:
 
     RPS.DrawGuess(frame, cap, hand_posture, True) # Change RPS.RPS.ROCK later with the detected hand posture
     RPS.IS(frame)
-
+    POSTURECHALLENGE = RPS.retRandom()
     # Module 4 hook
     leapguess = M3.module3Centre(M1.leapMotion())
-    handguess = M3.module3Centre(module2Array)
+    #handguess = M3.module3Centre(module2Array)
 
 
-    M4.Module4(frame, RPS.RPS.ROCK, handguess, RPS.RPS.SCISSOR, leapguess, cap.get(cv2.CAP_PROP_FPS))
-    M4.Module4(frame, RPS.RPS.ROCK, handguess, 2, leapguess, cap.get(cv2.CAP_PROP_FPS))
+    M4.Module4(frame, POSTURECHALLENGE, hand_posture, POSTURECHALLENGE, leapguess, cap.get(cv2.CAP_PROP_FPS))
+    #M4.Module4(frame, RPS.RPS.ROCK, handguess, 2, leapguess, cap.get(cv2.CAP_PROP_FPS))
 ########################################################################################################################
 #                                                                                                                      #
 #                                                 Showing Windows                                                      #
@@ -330,7 +330,6 @@ while True:
 
     cv2.imshow("Original Frame", frame)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
-    cv2.imshow("Frame Copy", copyFrame)
 
     k = cv2.waitKey(1) & 0xFF
     if k == 27:
