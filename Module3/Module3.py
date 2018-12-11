@@ -71,7 +71,7 @@ def module3Centre(cords):
 	middle 	= np.array([cords[4], cords[5]])
 	ring 	= np.array([cords[6], cords[7]])
 	centre 	= np.array([cords[10], cords[11]])
-
+  
 	thumb 	= centre - thumb
 	index 	= centre - index
 	middle 	= centre - middle
@@ -116,4 +116,3 @@ def module3Centre(cords):
 		return 0;
 
 	return -1;
-
