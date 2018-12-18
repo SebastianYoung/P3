@@ -7,12 +7,12 @@ import math
 import intsoft.RPS as RPS
 
 # Imports module 1, 3 and 4
-# import Module1.Module1 as M1
-# import Module3.Module3 as M3
-# import Module4.Module4 as M4
+import Module1.Module1 as M1
+import Module3.Module3 as M3
+import Module4.Module4 as M4
 
 # The video Capture (0) for inbuild camera, (1) for external Camera
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 go = False
 start = True
@@ -21,10 +21,10 @@ actualShadowColour = [0, 0, 0]
 minlen = 32
 maxlen = 62
 module2Array = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-
 while True:
 
     _, frame = cap.read()
+    hand_posture = None
 
     # Flips the Image for Gab
     frame = cv2.flip(frame, 1)
@@ -232,11 +232,11 @@ while True:
             centdis = math.sqrt((cX - far[0]) * (cX - far[0]) + ((cY - far[1]) * (cY - far[1])))
 
             # Creates a close bounding box around the entire hand that. Not used for anything other than showing.
-            for c in cnt:
-                peri = (cv2.arcLength(c, True))
-                approx = cv2.approxPolyDP(c, 0.01 * peri, True)
-                x, y, w, h = cv2.boundingRect(approx)
-                cv2.rectangle(copyFrame, (x, y), (w+x, h+y), (0, 255, 0), 1)
+           # for c in cnt:
+            #    peri = (cv2.arcLength(c, True))
+             #   approx = cv2.approxPolyDP(c, 0.01 * peri, True)
+              #  x, y, w, h = cv2.boundingRect(approx)
+               # cv2.rectangle(copyFrame, (x, y), (w+x, h+y), (0, 255, 0), 1)
 
             # Used to place the coordinates of each individual finger at their respected location.
             # Requires that the fingers are above the center of the pixel density (the moment).
@@ -246,30 +246,49 @@ while True:
             if start[1] <= cY + 10:
                 cv2.line(frame, (cX, cY), start, [255, 255, 255], 1)
                 cv2.line(copyFrame, (cX, cY), start, [255, 255, 255], 1)
+                cv2.line(frame, (cX-(int(area/200)), cY), (cX-(int(area/400)), cY), [255, 0, 255], 4)
+                cv2.line(frame, (cX - (int(area / 400)), cY - 80), (cX - (int(area / 1500)), cY - 80), [255, 0, 255], 4)
+                cv2.line(frame, (cX - (int(area / 2000)), cY - 100), (cX + (int(area / 2000)), cY - 100), [255, 0, 255], 4)
+                cv2.line(frame, (cX + (int(area / 1500)), cY - 60), (cX + (int(area / 600)), cY - 60), [255, 0, 255], 4)
+                cv2.line(frame, (cX + (int(area / 600)), cY), (cX + (int(area / 200)), cY), [255, 0, 255], 4)
                 cv2.putText(copyFrame, str(start), start, 1, 1, (0, 0, 255), 2)
-                if (start[0] <= cX - 130):
-                    cv2.putText(copyFrame, "Thumb", (start[0], start[1] - 10), 1, 1, (0, 0, 0), 2)
+                if (cX-(int(area/200)) < start[0] < cX-(int(area/400))):
+                    cv2.putText(copyFrame, "Thumb", (start[0], start[1] - 15), 1, 1, (0, 0, 0), 2)
                     module2Array[0] = start[0]
                     module2Array[1] = start[1]
-                if (cX -130 < start[0] <= cX - 20):
-                    cv2.putText(copyFrame, "Pointy Fingy", (start[0], start[1] - 10), 1, 1, (0, 0, 0), 2)
+
+                elif (cX-(int(area/400)) < start[0] < cX-(int(area/1500))):
+                    cv2.putText(copyFrame, "Index", (start[0], start[1] - 15), 1, 1, (0, 0, 0), 2)
                     module2Array[2] = start[0]
                     module2Array[3] = start[1]
-                if (cX - 15 < start[0] <= cX + 15):
-                    cv2.putText(copyFrame, "middle Fingy", (start[0], start[1] - 10), 1, 1, (0, 0, 0), 2)
+                elif (cX-(int(area/2000)) < start[0] < cX + (int(area/2000))):
+                    cv2.putText(copyFrame, "Middle", (start[0], start[1] - 15), 1, 1, (0, 0, 0), 2)
                     module2Array[4] = start[0]
                     module2Array[5] = start[1]
-                if (cX +30 < start[0] <= cX + 60):
-                    cv2.putText(copyFrame, "Put a ring on it", (start[0], start[1] - 10), 1, 1, (0, 0, 0), 2)
+                elif (cX+(int(area/1500)) < start[0] < cX+(int(area/600))):
+                    cv2.putText(copyFrame, "Ring", (start[0], start[1] - 15), 1, 1, (0, 0, 0), 2)
                     module2Array[6] = start[0]
                     module2Array[7] = start[1]
-                if (cX +60 < start[0] <= cX + 120):
-                    cv2.putText(copyFrame, "Pinky Promise", (start[0], start[1] - 10), 1, 1, (0, 0, 0), 2)
+                elif (cX+(int(area/600)) < start[0] < cX+(int(area/200))):
+                    cv2.putText(copyFrame, "Little", (start[0], start[1] - 15), 1, 1, (0, 0, 0), 2)
                     module2Array[8] = start[0]
                     module2Array[9] = start[1]
+
                 module2Array[10] = cX
                 module2Array[11] = cY
+
+                if (not module2Array.all() == 0):
+                    hand_posture = 1
+                elif ((not module2Array[2] == 0 and not module2Array[4] == 0)
+                      or (not module2Array[2] == 0 and not module2Array[6] == 0)):
+                    hand_posture = 2
+                elif (module2Array[4] == 0 and not module2Array[0] == 0 and module2Array[2] == 0):
+                    hand_posture = 0
+
+
+
             go = True
+        module2Array = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     except Exception as e:
         pass
         #print(sys.exc_info(), sys.exc_info()[2].tb_lineno)
@@ -291,14 +310,16 @@ while True:
 #                                                                                                                      #
 ########################################################################################################################
 
-    RPS.DrawGuess(frame, cap, RPS.RPS.ROCK, True) # Change RPS.RPS.ROCK later with the detected hand posture
+    RPS.DrawGuess(frame, cap, hand_posture, True) # Change RPS.RPS.ROCK later with the detected hand posture
     RPS.IS(frame)
-
+    POSTURECHALLENGE = RPS.retRandom()
     # Module 4 hook
-#     leapguess = M3.Module3(M1.leapMotion())
-#     handguess = RPS.RPS.SCISSOR
+    leapguess = M3.module3Centre(M1.leapMotion())
+    #handguess = M3.module3Centre(module2Array)
 
- #    M4.Module4(frame, RPS.RPS.ROCK, handguess, RPS.RPS.SCISSOR, leapguess, cap.get(cv2.CAP_PROP_FPS))
+
+    M4.Module4(frame, POSTURECHALLENGE, hand_posture, POSTURECHALLENGE, leapguess, cap.get(cv2.CAP_PROP_FPS))
+    #M4.Module4(frame, RPS.RPS.ROCK, handguess, 2, leapguess, cap.get(cv2.CAP_PROP_FPS))
 ########################################################################################################################
 #                                                                                                                      #
 #                                                 Showing Windows                                                      #
@@ -309,11 +330,7 @@ while True:
 
     cv2.imshow("Original Frame", frame)
     cv2.imshow("ResAdaptThresh", res_adaptThresh)
-    cv2.imshow("Frame Copy", copyFrame)
 
     k = cv2.waitKey(1) & 0xFF
     if k == 27:
         break
-
-
-
